@@ -1,0 +1,65 @@
+For GitLab for authentication --
+
+Edit Profile > SSH Keys
+
+Generate a public key on to your virtual machine - ssh-keygen
+cd /c/Users/deyve/.ssh
+cat id_rsa.pub
+
+copy the content to GitLab Profile, now you can clone any repository. 
+
+git config --global user.name "Devesh Kumar"
+git config --global user.email "deyvesshkumar@google.com"
+
+To Clone --
+git clone git@gitlab.com:username/repository_name.git
+
+when you clone some repository, you are as local in that repsitory 
+until or unless you push changes
+
+
+git status
+
+git add .
+git add carbonite.sh
+
+git commit .
+git commit carbonite.sh
+
+--now commits are saved to your local repository
+
+
+git push git@gitlab.com:Deyvessh/local-repo.git HEAD:HEAD
+
+--changes are pushed to master
+
+git push git@gitlab.com:Deyvessh/local-repo.git HEAD:feautre/application-connection
+
+--changes are pushed to feature/application-connection
+
+
+when you initilized .git repo
+
+git init
+git add .
+git commit .
+git push (error)
+
+git remote add <name> <url>
+git remote add origin git@gitlab.com:Deyvessh/local-repo.git -- repo connected
+git push --set-upstream origin mster -- branch connected
+
+git push -u origin master (might not be required)
+
+
+
+
+
+
+
+
+
+
+
+
+

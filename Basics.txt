@@ -1,0 +1,14 @@
+Build - Ship - Run
+
+1. Docker Image
+
+*Dockerfile
+-- FROM python -> Python Binaries and Libraries
+-- RUN pip install flask -> Flask
+-- WORKDIR /app -> Metadata Location changes
+-- COPY .. -> Application
+-- CMD python app.py
+
+2. Docker Registry 
+
+

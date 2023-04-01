@@ -1,0 +1,3500 @@
+docker version 
+
+-- shows you client and engine
+* Client talks to engine (docker server) over several protocols
+-- Socket (Default)
+-- TCP/TLS
+-- SSH Tunnel
+
+==========================================================================
+
+docker info
+
+-- displayes system-wide information
+
+docker run -d -p 8800:80 httpd  --Old Command
+docker container run --publish 80:80 nginx
+
+-d -- to run it in backgroud (--detach)
+-p -- public on ports (--publish)
+8800 -- to bind the ip to listen locally and publically
+80 -- default port for httpd
+
+8800:80 (HOST:CONTAINER)
+
+==========================================================================
+
+docker ps            	   (Show the container which is running)
+docker ps -a         	   (Show all the containers which is running and stopped)
+docker container ls   	   (Show the container which is running)
+docker container ls -a     (Show all the containers which is running and stopped)
+
+* it will get you the container that are running with
+-- container id
+-- image
+-- command
+-- created on?
+-- status
+-- ports, here 0.0.0.0:8800 -> 80/tcp
+-- names if any
+
+==========================================================================
+
+docker container stop bd4a23493068 (Stop the specific container)
+docker container start bd4a23493068 (Start the specific container)
+docker container ls -a (To list all container)
+
+==========================================================================
+
+docker container run -d -p 8083:80 --name webserver-nginx nginx
+
+-- To name a container
+
+==========================================================================
+
+docker container logs bd4a23493068
+docker container logs practical_bhaskara
+
+-- To see the logs of a particular container
+-- via container id or container name
+
+==========================================================================
+
+docker container rm cb6 bd4 5001305dd1f3 5001305dd1f3 ac25f57d5c45
+
+-- To remove an exited container which is not running
+
+==========================================================================
+
+docker container rm -f cb6f643ae8fc bd4a23493068
+
+-- To forcefully remove an running container
+
+==========================================================================
+
+docker top mongo
+
+-- show the docker processes
+-- mongo is the container name that i had specified as docker container run -d --name mongo mongo
+
+==========================================================================
+
+docker container run -d -p 3306:3306 --name db -e MYSQL_RANDOM_ROOT_PASSWORD=yes mysql
+
+-- To create a container to run mysql 
+-- Where -e is the env variable, you need to specify MYSQL_RANDOM_ROOT_PASSWORD=yes/true
+-- So, it will create you a random root password when you docker container logs db
+-- where db is the container name
+
+==========================================================================
+
+docker container top dbserver
+
+-- where dbserver is the container name
+-- shows the processes
+
+docker container top 432f97b5570a
+
+Output --
+
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+polkitd             27077               27058               0                   20:12               ?                   00:00:00            postgres
+polkitd             27125               27077               0                   20:12               ?                   00:00:00            postgres: checkpointer process
+polkitd             27126               27077               0                   20:12               ?                   00:00:00            postgres: writer process
+polkitd             27127               27077               0                   20:12               ?                   00:00:00            postgres: wal writer process
+polkitd             27128               27077               0                   20:12               ?                   00:00:00            postgres: autovacuum launcher process
+polkitd             27129               27077               0                   20:12               ?                   00:00:00            postgres: stats collector process
+
+
+==========================================================================
+
+docker container inspect dbserver
+
+-- show metadata about the container (Startup, config, volumes, networking etc..)
+-- where dbserver is the container name
+
+==========================================================================
+
+docker container stats
+docker container stats webserver
+
+-- show live performance data of all containers
+-- Container ID, Name, CPU %, Memory usage, Network I/O, Block I/O, PIDS
+-- where webserver is the container name if you want to show stats of one particular container. 
+
+==========================================================================
+
+docker container run -it 
+
+-- start new container interactively
+-- where -t is a pseudo-tty (simulates a real terminal, like what SSH does)
+-- where -i is interactively (where we keep that session open so we keep running more commands)
+
+==========================================================================
+
+docker container run -it --name webserver2 nginx
+
+-- It will create a nginx container and it will get you into the container. 
+
+root@4f967f8d8569:/usr/local/apache2#
+
+-- I will be under the container
+-- and if i exit out of the container then the container will be stopped
+-- if i want to start the container and get inside the container again then, 
+
+==========================================================================
+
+docker container start -ai webserver2
+
+root@4f967f8d8569:/usr/local/apache2#
+
+-- it will again get you into that container
+
+==========================================================================
+
+docker container exec -it 
+
+-- run additional commands in existing running container
+
+==========================================================================
+
+docker container exec -it dbserver bash
+
+-- it will get me into the running container if i want to make any file changes
+-- and when i exit the container it will not stop it, keep running
+-- where dbserver is the container name and bash is the command i want the terminal to open the container. 
+
+==========================================================================
+
+
+docker container run --rm -it --name centos centos:7 bash
+
+-- it will create a container and it would get you into container-id
+-- after exiting from container it will automatically be removed
+
+==========================================================================
+
+docker image ls
+
+-- it will show what images have been pulled from docker.hub.com 
+
+==========================================================================
+
+docker container port 58c19461dded
+
+-- To see what port is bind locally and publically
+-- 58c19461dded is just the container id
+
+3306/tcp -> 0.0.0.0:3306
+3306/tcp -> [::]:3306
+
+==========================================================================
+
+docker container inspect --format '{{ .NetworkSettings.IPAddress }}' webserver
+
+-- To get the IPAddress of a particular container 
+-- Where .NetworkSetting is a json variable
+
+or you can just run below command from grep
+
+docker container inspect dbserver | grep -i ipaddress
+
+"SecondaryIPAddresses": null,
+            "IPAddress": "172.17.0.3",
+                    "IPAddress": "172.17.0.3",
+
+==========================================================================
+
+docker network ls
+
+-- list you the docker network bridge 
+-- default docker virutal network, which is NAT'ed behind host ip
+
+==========================================================================
+
+docker network inspect bridge
+
+-- list you all docker container assigned IPs
+-- bridge is the default name of default virutal network created
+-- in which all your containers reside
+
+Subnet: 172.17.0.0/16
+
+"webserver": 172.17.0.2
+"ubuntu": 172.17.0.5
+"alpine": 172.17.0.4
+"dbserver": 172.17.0.3
+
+==========================================================================
+
+docker network create my-app-net
+
+-- create a virutal network for your docker containers
+
+Subnet: 172.18.0.0/16
+
+then, i can create an container assigning to the new virtual network i just created 
+
+docker container run -d -p 8090:80 --name new-httpd --network docker-app-net httpd
+
+-- inspecting the container via docker container inspect new-httpd | grep -i ipaddress
+
+new-httpd: 172.18.0.2
+
+-- IP of newly created container is 172.18.0.2
+
+==========================================================================
+
+docker network connect new-network-id container-id
+
+docker network connect 7f495d6f0b29 2f08d5f1a9d9
+
+-- 2f08d5f1a9d9 is my container - new-httpd which was having an ip "172.18.0.2"
+
+after running above command
+
+docker container inspect new-httpd | grep -i ipaddress
+
+-- it got assigned two IPs
+"172.17.0.6"
+"172.18.0.2"
+
+
+==========================================================================
+
+docker network disconnect network-id-to-be-deattached container-id
+
+docker network disconnect a56d9da26029 2f08d5f1a9d9
+
+-- container was having two IPs
+"172.17.0.6"
+"172.18.0.2"
+
+-- wanted to remove "172.18.0.2"
+
+-- ran the above command
+
+docker container inspect new-httpd | grep -i ipaddress
+
+-- it got left with one ip only
+"172.17.0.6"
+
+==========================================================================
+
+Docker DNS - docker deamon has a built-in DNS server that containers use by default
+
+DNS default names - docker defaults the hostname to the container's name, but you can set aliases
+
+
+Default Bridge Network has one disadvantage
+-- It doesn't have DNS Server built in by default
+-- you can use link option (--link list) manual link between container in the default bridge network. 
+-- Recommended - to create a separeate network adapter which has built in by default. 
+
+
+==========================================================================
+
+DNS Round Robin Test
+
+docker network create roundrobintest
+
+-- creating a network 
+-- Subnet - 172.19.0.0/16
+
+docker container run -d --net roundrobintest --net-alias search elasticsearch:2
+-- 172.19.0.2
+
+docker container run -d --net roundrobintest --net-alias search elasticsearch:2
+-- 172.19.0.3
+
+docker container run -d --net roundrobintest --net-alias search elasticsearch:2
+-- 172.19.0.4
+
+docker container run -d --net roundrobintest --net-alias search elasticsearch:2
+-- 172.19.0.5
+
+-- created four containers with elasticsearch version 2 image
+
+
+(docker container run --rm -d --net roundrobintest --net-alias search elasticsearch:2)
+(When the command is fired the container will be deleted or removed automatically)
+
+docker container run --net roundrobintest alpine nslookup search
+
+-- creating an container of alpine and nslookup to DNS Alias created as search
+-- everytime i run the command container is created and it runs and nslooup to the DNS alias
+-- in which we have created 4 container and it returns back 4 IPs associated to 4 containers
+
+Output --
+
+Server:         127.0.0.11
+Address:        127.0.0.11:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+Name:   search
+Address: 172.19.0.5
+Name:   search
+Address: 172.19.0.2
+Name:   search
+Address: 172.19.0.3
+Name:   search
+Address: 172.19.0.4
+
+
+
+docker container run --net roundrobintest centos curl -s search:9200
+
+-- creating an container of image centos and selecting the network roundrobintest
+-- curl on search alias in which elasticsearch:2 is listening on port 9200
+
+
+Output --
+
+{
+  "name" : "Master of Vengeance",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "Nw0l0jo5TSG3BNAy6glEzg",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+
+-- everytime i run the above command and centos container is created and return back some json values
+
+
+
+==========================================================================
+
+docker image history nginx:alpine
+
+-- show the history of an image
+
+docket image inspect nginx
+
+-- return json metadata about the image
+
+docker image [source-image]:tag [target-image]:tag
+
+-- assign one or more tags to an image
+
+docker image tag nginx:alpine deyvesshkumar/nginx:alpine
+
+-- here i have taken original nginx:alpine image and created a same image using my name and tag
+
+docker image ls 
+
+Output --
+
+REPOSITORY            TAG             IMAGE ID       CREATED         SIZE
+
+deyvesshkumar/nginx   alpine          2bc7edbc3cf2   10 days ago     40.7MB
+
+nginx                 alpine          2bc7edbc3cf2   10 days ago     40.7MB
+
+
+-- and this image doesn't exists in my docker repository.
+-- and newly created image having the same image id. 
+
+
+docker login
+
+-- if you want to push the recenlty created image first you have to authenticate yourself with the your
+   account
+-- cat .docker/config.json
+
+-- here, authentication key is stored in the config.json file
+
+docker image push deyvesshkumar/nginx:alphine
+
+-- then you image should be pushed to the dockerhub
+
+
+
+Let's create one more image using deyvesshkumar/nginx:alpine
+
+docker image tag deyvesshkumar/nginx:alpine deyvesshkumar/nginx:testing
+
+REPOSITORY            TAG             IMAGE ID       CREATED         SIZE
+
+deyvesshkumar/nginx   alpine          2bc7edbc3cf2   10 days ago     40.7MB
+
+deyvesshkumar/nginx   testing         2bc7edbc3cf2   10 days ago     40.7MB
+
+
+-- Let's push the deyvesshkumar/nginx:testing image to dockerhub
+
+docker image push deyvesshkumar/nginx:testing
+
+Output --
+
+The push refers to repository [docker.io/deyvesshkumar/nginx]
+042cd3f87f43: Layer already exists
+f1bee861c2ba: Layer already exists
+c4d67a5827ca: Layer already exists
+152a948bab3b: Layer already exists
+5e59460a18a3: Layer already exists
+d8a5a02a8c2d: Layer already exists
+7cd52847ad77: Layer already exists
+testing: digest: sha256:3eb380b81387e9f2a49cb6e5e18db016e33d62c37ea0e9be2339e9f0b3e26170 size: 1781
+
+-- here, you can see - it doesn't push the whole image because the layer already exists on the dockerhub
+
+
+==========================================================================
+
+
+Dockerfile
+
+-- FROM
+-- ENV
+-- RUN
+-- EXPOSE
+-- CMD
+
+
+/C:/Users/deyve/OneDrive/OneDrive - digiswitch.in/
+desktop/Docker/Repo/udemy-docker-mastery/dockerfile-sample-1/Dockerfile
+
+docker image build -t customnginx .
+
+-- for building the image 
+
+
+==========================================================================
+
+docker system --help
+
+-- docker system [OPTIONS] command to manage images, containers, Local volumes and Build cache
+
+docker system df (To show docker disk usage)
+
+-- Output
+
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          0         0         0B        0B
+Containers      0         0         0B        0B
+Local Volumes   0         0         0B        0B
+Build Cache     1         0         0B        0B
+
+
+docker system prune
+
+-- it will remove, 
+-- all stopped containers
+-- all networks not used by at least one container
+-- all dangling images
+-- all dangling build cache
+
+docker system prune -a -f 
+
+-- it will force delete all, won't give you any prompt
+-- all stopped containers
+-- all networks not used by at least one container
+-- all dangling images
+-- all dangling build cache
+
+docker image prune
+
+-- it will remove, 
+-- all dangling images
+
+docker container prune
+
+-- it will remove, 
+-- all dangling stopped container
+
+
+==========================================================================
+
+Persist the DataVolume of a CONTAINER (Named Volume)
+
+docker container run -d --name sqltest -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
+-- docker is created using image
+
+docker volume ls
+
+-- lists the volume
+
+Output --
+
+DRIVER    VOLUME NAME
+local     92cd50fba4e8567e8bc9269c47618da36e2dc07425c8192947364b0fc154d516
+
+-- You can not identify which volume is assigned to which container you will have to inspect the 
+   Container each and every time (Not the best practice)
+   
+ 
+-- Lets create another container
+
+docker container run -d --name sqltest2 -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
+docker volume ls 
+
+Output --
+
+DRIVER    VOLUME NAME
+local     92cd50fba4e8567e8bc9269c47618da36e2dc07425c8192947364b0fc154d516
+local     f0b24f0ca3e5282f7ae4134bde79fb79cd0e64e9ceb67afec09ab5632d5227dd
+
+
+-- If you inspect the container 
+
+docker container inspect sqltest
+
+Output --
+
+"Mounts": [
+            {
+                "Type": "volume",
+                "Name": "f0b24f0ca3e5282f7ae4134bde79fb79cd0e64e9ceb67afec09ab5632d5227dd",
+                "Source": "/var/lib/docker/volumes/f0b24f0ca3e5282f7ae4134bde79fb79cd0e64e9ceb67afec09ab5632d5227dd/_data",
+                "Destination": "/var/lib/mysql",
+
+
+-- but if you create a container specifies the volume to persist it. 
+
+docker container run -d --name sqltest3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v sqltest3:/var/lib/mysql mysql
+
+docker volume ls 
+
+Output --
+
+DRIVER    VOLUME NAME
+local     92cd50fba4e8567e8bc9269c47618da36e2dc07425c8192947364b0fc154d516
+local     f0b24f0ca3e5282f7ae4134bde79fb79cd0e64e9ceb67afec09ab5632d5227dd
+local     sqltest3
+
+
+-- and if you inspect the recenlty created container 
+
+docker container inspect sqltest3
+
+Output --
+
+"Mounts": [
+            {
+                "Type": "volume",
+                "Name": "sqltest3",
+                "Source": "/var/lib/docker/volumes/sqltest3/_data",
+                "Destination": "/var/lib/mysql",
+
+
+==========================================================================
+
+-- Persistant Data - Bind Mounting
+
+cd /docker/repo/udemy-docker-mastery/dockerfile-sample-2
+
+docker container run -d -p 8080:80 --name nginxtest -v $(pwd):/usr/share/nginx/html nginx
+
+-- docker container is created mounted to local directory to container directory
+-- Local Directory (/docker/repo/udemy-docker-mastery/dockerfile-sample-2) 
+-- Container Directory (/usr/share/nginx/html)
+
+-- and these two directories are in sync
+
+-- if i inspect the container
+
+docker container inspect nginxtest
+
+Output --
+
+"Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/docker/repo/udemy-docker-mastery/dockerfile-sample-2",
+                "Destination": "/usr/share/nginx/html",
+
+
+==========================================================================
+
+Database upgrade with named volumes
+
+docker container run -d --name psql -e POSTGRES_PASSWORD=Devkumar@5988 -v postgres:/var/lib/postgresql/data postgres:9.6.1
+
+-- We created a container from postgres:9.6.1 image
+-- within postgres volume
+
+docker volume ls
+
+DRIVER    VOLUME NAME
+local     postgres
+
+-- if we want to upgrade to postgres:9.6.2, so we will have to stop the container and make a new
+   container in the same volume
+   
+
+docker container run -d --name psql2 -e POSTGRES_PASSWORD=Devkumar@5988 -v postgres:/var/lib/postgresql/data postgres:9.6.2
+
+-- The point there is that with traditional Linux software you'd have to do a apt-get upgrade 
+   and then it would replace the binaries/libraries 9.6.1 with 9.6.2, but in containers to do 
+   that inside the 9.6.1 container is an anti-pattern. We want the container to be immutable, 
+   so we don't want to update files manually inside the container, rather we want to swap out the 
+   container itself with a newer version.
+
+-- When it comes to postgres, and doing 9.6.2 upgrades, they are transparent. "patch releases" 
+   such as these don't require special processes or commands... so if you were to deploy, 
+   let's say, postgres 9.6.0, you should be able to replace the container 
+   (while keeping the same volumes) throughout the 9.6.x lifecycle. I'd say this isn't true for 
+   all software, but usually the way for open source databases.
+
+
+==========================================================================
+
+Docker Compose
+
+-- An YAML file describes about 
+   - Containers 
+   - Volumes
+   - networks
+
+-- A CLI Tool (docker-compose) user for local dev/test automation with those YAML files
+
+docker compose up 
+
+-- setup volumes/networks and start all containers
+
+docker compose down 
+
+-- stop all containers and remove container/volume/networks
+
+
+
+-- Example of an template.yml file
+
+version: '2.0'       # if no version is specified then version1 is assumed, Recommended Version2 minimum
+
+services:			 # containers, same as docker run
+  servicename:		 # a friendly name, this is also DNS name inside network
+    image:           # OPTIONAL: if you use build
+	command:         # OPTIONAL: replace the default CMD specified by the image
+	environment:     # OPTIONAL: same as -e in docker run
+	volume:          # OPTIONAL: same as -v in docker run
+  
+  servicename2:
+
+volumes:             # OPTIONAL: same as docker volume create
+networks:            # OPTIONAL: same as docker network create
+
+
+==========================================================================
+
+
+Docker container creatiion via docker-compose.yml file
+
+-- Folder consists a docker-compose.yml and nginx.conf file
+
+cat docker-compose.yml
+
+Output --
+
+services:
+  proxy:
+    image: nginx:1.23
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  web:
+    image: httpd:2
+  
+
+docker compose up
+
+-- This will run the command and start the services whatever resides in docker-compose.yml
+
+docker compose up -d
+
+-- This will run in backgroud
+
+docker compose ps
+
+-- To know the container status
+
+docker compose top
+
+-- To know the services running 
+
+docker compose down
+
+-- To stop and remove the container 
+
+docker compose down --rmi local
+
+-- To stop the container and remove the corresponding images those were build during container creation
+
+
+==========================================================================
+
+[Docker Swarm] 
+
+
+docker info
+
+-- Output
+
+Swarm: inactive
+ 
+ 
+ 
+docker swarm init --advertise-addr 139.59.82.247   
+or
+docker swarm init
+
+-- because it could not choose an IP address to advertise since this system has multiple addresses 
+   on interface eth0 (139.59.82.247 and 10.47.0.5)
+-- so, i chose 139.59.82.247
+
+
+
+docker info 
+
+-- Output
+
+Swarm: active
+
+
+
+docker node ls
+
+-- To list the nodes
+
+Output -- 
+
+ID                            HOSTNAME          STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+q0q3u36uztfsvul3y4lkpj238 *   docker--1--prod   Ready     Active         Leader           23.0.1
+
+
+
+docker service ls
+
+-- To list the services under docker 
+
+
+
+docker service create alpine ping 8.8.8.8
+
+-- To create a service and run ping 8.8.8.8
+
+
+
+
+docker service ls 
+
+Output -- 
+
+ID             NAME               MODE         REPLICAS   IMAGE           PORTS
+j67b2ductbm5   magical_lovelace   replicated   1/1        alpine:latest
+
+
+
+docker service ps j67b2ductbm5
+
+Output -- 
+
+ID             NAME                 IMAGE           NODE              DESIRED STATE   CURRENT STATE           ERROR     PORTS
+3ihb2mjgexsa   magical_lovelace.1   alpine:latest   docker--1--prod   Running         Running 2 minutes ago
+
+-- It shows the node this service is attached with (docker--1--prod)
+
+
+
+docker service update j67b2ductbm5 --replicas 3
+
+Output -- 
+
+ID             NAME               MODE         REPLICAS   IMAGE           PORTS
+j67b2ductbm5   magical_lovelace   replicated   3/3        alpine:latest
+
+-- Here, you can see 3 replicas is created
+-- Update (Update a service)
+
+
+
+docker service ps j67b2ductbm5
+
+Output -- 
+
+ID             NAME                 IMAGE           NODE              DESIRED STATE   CURRENT STATE                ERROR     PORTS
+3ihb2mjgexsa   magical_lovelace.1   alpine:latest   docker--1--prod   Running         Running 5 minutes ago
+o70qb9dk4t1p   magical_lovelace.2   alpine:latest   docker--1--prod   Running         Running about a minute ago
+9kemdfn30vt2   magical_lovelace.3   alpine:latest   docker--1--prod   Running         Running about a minute ago
+
+-- So, basically N-number of containers are created for N-number of services
+-- here, 3 services are running so 3 containers were created
+
+
+docker container ls -a
+
+Output -- 
+
+CONTAINER ID   IMAGE           COMMAND          CREATED          STATUS          PORTS     NAMES
+b7a14afe6ccc   alpine:latest   "ping 8.8.8.8"   8 minutes ago    Up 8 minutes              magical_lovelace.2.o70qb9dk4t1pilmqywehvsmi3
+5fab98ca8a19   alpine:latest   "ping 8.8.8.8"   8 minutes ago    Up 8 minutes              magical_lovelace.3.9kemdfn30vt2g8zxikw9082ci
+5c22e288ecb4   alpine:latest   "ping 8.8.8.8"   12 minutes ago   Up 12 minutes             magical_lovelace.1.3ihb2mjgexsaktgkdbbawc39p
+
+-- Suppose, if i delete any of the container 
+
+
+docker container rm -f magical_lovelace.3.9kemdfn30vt2g8zxikw9082ci
+
+docker service ls 
+
+Output -- 
+
+ID             NAME               MODE         REPLICAS   IMAGE           PORTS
+j67b2ductbm5   magical_lovelace   replicated   2/3        alpine:latest
+
+-- For the time being replicas decreses by one (2/3) but in seconds new container is spinned up along with the 
+   service. 
+
+
+
+docker container ls -a
+
+Output -- 
+
+CONTAINER ID   IMAGE           COMMAND          CREATED          STATUS          PORTS     NAMES
+75eb593ab4e9   alpine:latest   "ping 8.8.8.8"   31 seconds ago   Up 26 seconds             magical_lovelace.3.mutj6h6ksxuzi1tshineckpta
+b7a14afe6ccc   alpine:latest   "ping 8.8.8.8"   9 minutes ago    Up 9 minutes              magical_lovelace.2.o70qb9dk4t1pilmqywehvsmi3
+5c22e288ecb4   alpine:latest   "ping 8.8.8.8"   13 minutes ago   Up 13 minutes             magical_lovelace.1.3ihb2mjgexsaktgkdbbawc39p
+
+
+
+docker service ls -a 
+
+ID             NAME               MODE         REPLICAS   IMAGE           PORTS
+j67b2ductbm5   magical_lovelace   replicated   3/3        alpine:latest
+
+
+
+docker service ps magical_lovelace
+
+ID             NAME                     IMAGE           NODE              DESIRED STATE   CURRENT STATE            ERROR                         PORTS
+3ihb2mjgexsa   magical_lovelace.1       alpine:latest   docker--1--prod   Running         Running 16 minutes ago
+o70qb9dk4t1p   magical_lovelace.2       alpine:latest   docker--1--prod   Running         Running 12 minutes ago
+mutj6h6ksxuz   magical_lovelace.3       alpine:latest   docker--1--prod   Running         Running 3 minutes ago
+9kemdfn30vt2    \_ magical_lovelace.3   alpine:latest   docker--1--prod   Shutdown        Failed 3 minutes ago     "task: non-zero exit (137)"
+
+
+
+=====================================================
+
+-- So, the current infrastrure i am having. 
+-- 3 node on Hyper-V
+
+172.18.147.160	node1
+172.18.158.180  node2
+172.18.157.170	node3
+
+
+node1 - Manager
+node2 - Worker
+node3 - worker
+
+
+
+docker swarm join-token worker
+
+-- show the token on master to copy and join onto workers
+
+Output --
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-1u67ojqopu47emt34e96s850ign8fc5qfj6j9u8ilw5ycumnrx-4enstoxfo83zr5yyhqcdoaa82 172.18.147.160:2377
+
+
+
+
+docker swarm join-token manager
+
+-- show the token on master to copy or upgrade the worker node to manager
+
+Output -- 
+
+To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-1u67ojqopu47emt34e96s850ign8fc5qfj6j9u8ilw5ycumnrx-2yn9ov2lz8btynh81qmft7hon 172.18.147.160:2377
+
+
+
+-- So, node1 is Master or Leader node
+   where node2 is Worder and node3 is also Worker node. 
+   
+   
+docker node ls 
+
+Output --
+
+docker node ls
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active                          23.0.1
+n98gy1yvwaclcvu1ky59oj3a8     node3      Ready     Active                          23.0.1
+
+   
+
+-- as, on the worker node swarm commands do not apply
+-- if you type in below commands on any node2 or node3
+
+docker node ls 
+
+-- it will throw you an error on worker nodes
+
+Output --
+
+Error response from daemon: This node is not a swarm manager. Worker nodes can't be used to view 
+or modify cluster state. Please run this command on a manager node or promote the current node 
+to a manager.
+
+
+-- if you want that worker node can use swarm commands, so you need to get some permission to 
+   node2 and node3
+   
+
+docker node update --role manager node2 (on node1)
+
+Output --
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+n98gy1yvwaclcvu1ky59oj3a8     node3      Ready     Active                          23.0.1
+
+
+-- Let's do a workaround, i joined node3 as a worker, althogh i can run an command to update the node3  
+   worker node to manager, but what if i want to join the node3 directly as manager. 
+-- for that, first i have to leave swarm on node3 which is joined as worker node.
+
+
+docker swarm leave (on node3)
+
+Output --
+
+Node left the swarm
+
+-- Lets check the status on node1
+
+
+
+
+docker node ls (on node1)
+
+Output --
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+n98gy1yvwaclcvu1ky59oj3a8     node3      Down      Active                          23.0.1
+
+-- as you can see the node3 is down
+
+
+
+
+
+docker swarm join-token manager (on node1)
+
+Output --
+
+To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-1u67ojqopu47emt34e96s850ign8fc5qfj6j9u8ilw5ycumnrx-2yn9ov2lz8btynh81qmft7hon 172.18.147.160:2377
+	
+	
+
+-- Running below command on node3
+
+docker swarm join --token SWMTKN-1-1u67ojqopu47emt34e96s850ign8fc5qfj6j9u8ilw5ycumnrx-2yn9ov2lz8btynh81qmft7hon 172.18.147.160:2377
+
+
+
+
+-- Lets check the status on node1
+
+docker node ls 
+
+Output -- 
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+kbwtdhrsw3vkgvwi5i0ny9qc0     node3      Ready     Active         Reachable        23.0.1
+n98gy1yvwaclcvu1ky59oj3a8     node3      Down      Active                          23.0.1
+
+-- node3 joined as manager and it has the Manager Stauts as reachable.
+
+
+
+
+-- Lets create a service of alpine:latest with --replicas 5 on node1 which is master node
+
+docker service create --replicas 5 alpine:latest ping 8.8.8.8
+
+docker service ls 
+
+Output --
+
+ID             NAME              MODE         REPLICAS   IMAGE           PORTS
+4d2nvza8zrse   heuristic_ellis   replicated   5/5        alpine:latest
+
+
+
+docker service ps heuristic_ellis
+
+Output -- 
+
+ID             NAME                IMAGE           NODE      DESIRED STATE   CURRENT STATE                ERROR     PORTS
+xwjbewdrkkeo   heuristic_ellis.1   alpine:latest   node3     Running         Running about a minute ago
+uwwyaegq0wm1   heuristic_ellis.2   alpine:latest   node2     Running         Running about a minute ago
+ivcj5qo5cgjf   heuristic_ellis.3   alpine:latest   node3     Running         Running about a minute ago
+s4lywrdbsf11   heuristic_ellis.4   alpine:latest   node1     Running         Running about a minute ago
+fuo2br8nu75m   heuristic_ellis.5   alpine:latest   node2     Running         Running about a minute ago
+
+-- as you can see
+-- 1 replica is created under node1
+-- 2 replicas are created under node2
+-- 2 replicas are created under node3
+
+
+********************************************
+
+== promote or demote
+
+-- suppose all nodes are manager but your node3 is your leader also
+-- you dont't want node3 to be leader, you want to promote node1 a leader
+
+
+Output --
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Reachable        23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+kbwtdhrsw3vkgvwi5i0ny9qc0     node3      Ready     Active         Leader           23.0.1
+
+
+
+docker node demote node3
+
+-- it should automatically get node1 a leader if not then demote node2 also
+
+
+Output --
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+kbwtdhrsw3vkgvwi5i0ny9qc0     node3      Ready     Active                          23.0.1
+
+
+-- then promote node3 as manager
+
+docker node promote node3
+
+Output --
+
+Node node3 promoted to a manager in the swarm.
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+uiaaam0tf6i692yvffh0or6j2 *   node1      Ready     Active         Leader           23.0.1
+owdon81xo07qapicu5sxj7fsp     node2      Ready     Active         Reachable        23.0.1
+kbwtdhrsw3vkgvwi5i0ny9qc0     node3      Ready     Active         Reachable        23.0.1
+
+********************************************
+
+========================================================
+
+
+== Scaling out with Overlay Networking ==
+
+-- on node1
+
+docker network create --driver overlay drupal-db-prod
+
+Output -- 
+
+NETWORK ID     NAME              DRIVER    SCOPE
+f4be4c399852   bridge            bridge    local
+9bd735bb24c4   docker_gwbridge   bridge    local
+b6d43gciru3s*  drupal-db-prod    overlay   swarm
+683fefe6a650   host              host      local
+4vi5th628kg0   ingress           overlay   swarm
+b1b41ed047b5   none              null      local
+
+
+-- Lets just create a postgres:14 service 
+
+
+docker service create --name postgres-prod --network drupal-db-prod -e POSTGRES_PASSWORD=dradmin postgres:14
+
+docker service ls
+
+Output --
+
+ID             NAME            MODE         REPLICAS   IMAGE         PORTS
+rk2anedbjwph   postgres-prod   replicated   1/1        postgres:14
+
+
+
+-- Lets just create drupal:9 service also
+
+docker service create --name drupal-prod  --network drupal-db-prod -p 80:80 drupal:9
+
+docker service ls 
+
+Output --
+
+ID             NAME            MODE         REPLICAS   IMAGE         PORTS
+exx1kt7bc1pw   drupal-prod     replicated   1/1        drupal:9      *:80->80/tcp
+rk2anedbjwph   postgres-prod   replicated   1/1        postgres:14
+
+
+************************************************************************
+
+-- There is a watch command in ubuntu 
+-- It executes a program periodically in every 2 Seconds, showing output fullscreen
+
+watch docker service ls
+
+************************************************************************
+
+-- So, what i wanted to state there
+-- that postgres is running on node1 and drupal is running on node2
+-- So, how do they talk to each other?
+-- So, Any IP you put in your browser either node1 or node2, it can able to talk to each other across
+   nodes and i am getting a drupal facing service to setup the database in both the cases. 
+-- That is the great thing about overlay, it just acts like everything is on the same subnet
+
+
+
+docker service ps postgres-prod
+
+Output --
+
+ID             NAME              IMAGE         NODE      DESIRED STATE   CURRENT STATE           ERROR     PORTS
+lip0ote82zd9   postgres-prod.1   postgres:14   node1     Running         Running 9 minutes ago
+
+
+
+docker service ps drupal-prod
+
+Output --
+
+ID             NAME            IMAGE      NODE      DESIRED STATE   CURRENT STATE           ERROR     PORTS
+3krwjfbrvca3   drupal-prod.1   drupal:9   node2     Running         Running 4 minutes ago
+
+
+=====================================================
+
+-- So, this section is in continue of last topic
+-- Your postgres service is running on node1 and frontend drupal is running on node2
+-- but if you take any of the node IP (either node1, node2 or node3) and put it into browser, 
+   the same webpage opens
+-- how it does that and what it is?
+
+ == Routing Mash ==
+ 
+-- Routes ingress (incoming) packets for a service
+-- It spanes all nodes in swarm (Master or Worker)
+-- It uses IPVS (IP Virtual Server) - IPVS running on a host acts as a load balancer at the front 
+   of a cluster of real servers.
+-- It Load Balances Swarm Services across their tasks
+
+Two ways it works
+
+-- Container-to-Container in a Overlay Network (uses VIP [Virtual IP])
+   
+   *All the nodes talks to each other, they would actually talk to something called VIP (Virtual IP)
+    that swarms puts in front of all services and this is a private IP inside the virtual networking
+	of swarm, and it ensures that the load is distributed amongst all tasks for a service. 
+	
+-- External traffice incoming to published ports (all nodes listen)
+
+   *External traffic coming into you swarm can actually choose to hit any of the nodes in your swarm,
+    any of the worker nodes are going to have that published port open and listening for that 
+	container's traffic and then it will reroute that traffic to the proper container based on its
+	Load Balancing. 
+
+
+
+== Scenario ==
+
+If i created a new swarm service and i told it to have three replicas and it created three tasks, with
+three containers, on three nodes. Inside that overlay network, its acutally creating a virutal IP thats
+mapped to the DNS name of that service, right? and the service, by default, the DNS name, is the name of 
+the service. so in this case, i created a service called my-web, and any other containers i have in my
+overlay network that need to talk to that service inside the swarm, they only have to worry about using
+the my web DNS. the virutal IP properly load balances the traffice amongst all the tasks in that service
+
+
+
+== Routing Mesh ==
+
+-- This is stateless load balancing 
+-- This Load Balancer is at OSI Layer 3 (TCP), not Layer 4 (DNS)
+-- Docker Enterprise Edition, comes with built-in Layer 4 (DNS) web-proxy
+
+
+
+-- Examples 
+
+docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+
+
+==============================================================
+
+== Assignment ==
+
+== Create a Multi-Service Multi-Node Web App ==
+
+
+
+Assignment: Create A Multi-Service Multi-Node Web App
+Goal: create networks, volumes, and services for a web-based "cats vs. dogs" voting app
+Here is a basic diagram of how the 5 services will work:
+
+
+All images are on Docker Hub, so you should use editor to craft your commands locally, then paste them 
+into swarm shell (at least that's how I'd do it)
+
+a backend and frontend overlay network are needed. Nothing different about them other than that backend 
+will help protect database from the voting web app. (similar to how a VLAN setup might be in 
+traditional architecture)
+
+
+== Command ==
+
+docker network create -d overlay backend
+
+docker network create -d overlay frontend
+
+
+
+The database server should use a named volume for preserving data. Use the new --mount format to do 
+this: --mount type=volume,source=db-data,target=/var/lib/postgresql/data
+
+
+Services (names below should be service names)
+
+
+vote
+
+bretfisher/examplevotingapp_vote
+web frontend for users to vote dog/cat
+ideally published on TCP 80. Container listens on 80
+on frontend network
+2+ replicas of this container
+
+
+== Command ==
+
+docker service create --name vote -p 80:80 --network frontend --replicas 2 bretfisher/examplevotingapp_vote
+
+
+
+redis
+
+redis:3.2
+key-value storage for incoming votes
+no public ports
+on frontend network
+1 replica (NOTE VIDEO SAYS TWO BUT ONLY ONE NEEDED)
+
+
+== Command ==
+
+docker service create --name redis --network frontend redis:3.2
+
+
+
+worker
+
+bretfisher/examplevotingapp_worker
+backend processor of redis and storing results in postgres
+no public ports
+on frontend and backend networks
+1 replica
+
+
+== Command ==
+
+docker service create --name worker --network frontend --network backend bretfisher/examplevotingapp_worker
+
+
+
+
+db
+
+postgres:9.4
+one named volume needed, pointing to /var/lib/postgresql/data
+on backend network
+1 replica
+remember set env for password-less connections -e POSTGRES_HOST_AUTH_METHOD=trust
+
+
+== Command ==
+
+docker service create --name db --network backend -e POSTGRES_HOST_AUTH_METHOD=trust --mount type=volume,source=db-data,target=/var/lib/postgresql/data postgres:9.4
+
+
+
+result
+
+bretfisher/examplevotingapp_result
+web app that shows results
+runs on high port since just for admins (lets imagine)
+so run on a high port of your choosing (I choose 5001), container listens on 80
+on backend network
+1 replica
+
+
+== Command ==
+
+docker service create --name result -p 5001:80 --network backend bretfisher/examplevotingapp_result
+
+
+=================================================================
+
+== Stacks ==
+
+== Stacks accept Compose Files as their declarative defination for services, networks and volumes ==
+
+== We user 'docker stack deploy' rather than 'docker service create' ==
+
+-- Stacks manages all those objects for us, including overlay network per stack
+-- New 'deploy:' key in Compose File. Can't do 'build:'
+-- Compose now ignores 'deploy:', Swarm ignores 'build:'
+-- 'docker compose' cli not needed on Swarm Servers
+
+
+-- so, there is .yaml file (example-voting-app-stack.yml) under udemy-docker-mastery/swarm-stack-1
+
+-- we will example each and every step later
+-- first we will do how to configure the .yml file using stack
+
+
+
+docker stack deploy -c example-voting-app-stack.yml voteapp
+
+-- here '-c' is compose and voteapp is just a name of the stack 
+
+Output --
+
+Creating network voteapp_frontend
+Creating network voteapp_backend
+Creating service voteapp_worker
+Creating service voteapp_visualizer
+Creating service voteapp_redis
+Creating service voteapp_db
+Creating service voteapp_vote
+Creating service voteapp_result
+
+
+-- The corresponding networks are created as per the .yml file
+
+
+docker network ls
+
+Output --
+
+NETWORK ID     NAME               DRIVER    SCOPE
+607a73aa427a   bridge             bridge    local
+9bd735bb24c4   docker_gwbridge    bridge    local
+683fefe6a650   host               host      local
+4vi5th628kg0   ingress            overlay   swarm
+b1b41ed047b5   none               null      local
+nugushrgvco1*  voteapp_backend    overlay   swarm
+v2lckm50eh4x*  voteapp_frontend   overlay   swarm
+
+
+
+docker stack ls
+
+Output --
+
+NAME      SERVICES
+voteapp   6
+
+
+
+docker stack ps voteapp
+
+Output --
+
+ID             NAME                   IMAGE                                       NODE      DESIRED STATE   CURRENT STATE                ERROR     PORTS
+klmrq18lmy93   voteapp_db.1           postgres:9.4                                node1     Running         Running about a minute ago
+8of550w47jk5   voteapp_redis.1        redis:alpine                                node3     Running         Running about a minute ago
+rwv0hc0smfls   voteapp_result.1       bretfisher/examplevotingapp_result:latest   node2     Running         Running about a minute ago
+3bcydpvr33sq   voteapp_visualizer.1   bretfisher/visualizer:latest                node1     Running         Running 51 seconds ago
+dmtw6pr3kgii   voteapp_vote.1         bretfisher/examplevotingapp_vote:latest     node2     Running         Running about a minute ago
+khsykjkmyxnu   voteapp_vote.2         bretfisher/examplevotingapp_vote:latest     node3     Running         Running about a minute ago
+w8ym2pc1cplw   voteapp_worker.1       bretfisher/examplevotingapp_worker:latest   node1     Running         Running about a minute ago
+
+
+docker stack services voteapp
+
+Output --
+
+ID             NAME                 MODE         REPLICAS   IMAGE                                       PORTS
+rujxc6y8hjig   voteapp_db           replicated   1/1        postgres:9.4
+rbfpa2mu6kg9   voteapp_redis        replicated   1/1        redis:alpine
+15n7yy0kwyu0   voteapp_result       replicated   1/1        bretfisher/examplevotingapp_result:latest   *:5001->80/tcp
+nudxjt12l5rx   voteapp_visualizer   replicated   1/1        bretfisher/visualizer:latest                *:8080->8080/tcp
+m711bw1tc3st   voteapp_vote         replicated   2/2        bretfisher/examplevotingapp_vote:latest     *:5000->80/tcp
+67ec4325ie5s   voteapp_worker       replicated   1/1        bretfisher/examplevotingapp_worker:latest
+
+
+==============================================================
+
+== Secret Storage for Swarm ==
+
+== Protecting your Environment Variables ==
+
+-- As of Docker 1.13.0 Swarm Raft DB is encrypted on disk
+-- Only stored on disk on Manager nodes
+-- Default is Managers and Workers "Control Plane" is TLS + Manual Authorization
+-- Secrets are first stored in Swarm, then assigned to a Service(s)
+-- Only containers in assigned Service(s) can see them
+-- They look like files in container but are actually in memory 
+   /run/secrets/<secret_name>
+   or
+   /run/secrets/<secret_alias>
+-- Local docker compose can use file-based secrets, but not secure
+-- Until or unless, you dont have swarm - you can't use secrets. Its swarm only thing. 
+
+
+
+-- There are two ways we can create a secret, one is saving the txt in file and while creating the 
+   secret pass the file path and second just passing the argument while creating services
+   
+-- My DB password is stored in udemy-docker-mastery/secrets-sample-1/db.user.txt
+
+
+
+
+docker secret create psql_user db_user.txt
+
+-- where psql_user is the name of the secret
+
+
+Output --
+
+mpmglovsdh8l48fjzbdoedd7u
+
+
+
+echo "myDBpassWORD" | docker secret create psql_pass -
+
+
+-- '-' at the last, telling command to read from the standard input which we echoed "myDBpassWORD"
+
+
+Output --
+
+oj9lsxxc3g39lm7jiqlrirjol
+
+
+
+docker secret ls
+
+Output --
+
+ID                          NAME        DRIVER    CREATED              UPDATED
+oj9lsxxc3g39lm7jiqlrirjol   psql_pass             9 seconds ago        9 seconds ago
+mpmglovsdh8l48fjzbdoedd7u   psql_user             About a minute ago   About a minute ago
+
+
+-- If you try to inspect the secret, you see nothing
+
+docker secret inspect psql_user
+
+Output --
+
+[
+    {
+        "ID": "mpmglovsdh8l48fjzbdoedd7u",
+        "Version": {
+            "Index": 250
+        },
+        "CreatedAt": "2023-03-15T19:24:12.362707713Z",
+        "UpdatedAt": "2023-03-15T19:24:12.362707713Z",
+        "Spec": {
+            "Name": "psql_user",
+            "Labels": {}
+        }
+    }
+]
+
+
+
+-- Now, let's just create the DB service while passing the secrets
+
+
+docker service create --name psql --secret psql_user --secret psql_pass -e POSTGRES_PASSWORD_FILE=/run/secrets/psql_pass -e POSTGRES_USER_FILE=/run/secrets/psql_user postgres
+
+-- That means the secret which has been created will be passed to corresponding path in container when
+   the container will be created in the path we mentioned
+   
+   
+Output --
+
+touxwl1u838zwzha4zokrtyvw
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+
+
+docker service ps psql
+
+Output --
+
+ID             NAME      IMAGE             NODE      DESIRED STATE   CURRENT STATE                ERROR     PORTS
+446id3xme4wo   psql.1    postgres:latest   nodeB     Running         Running about a minute ago 
+
+
+
+docker exec -it psql.1.446id3xme4wo720o8skwyqeun bash
+
+Output --
+
+root@8aa870991564:/# cd /run/secrets/
+root@8aa870991564:/run/secrets# ls
+psql_pass  psql_user
+
+-- if i cat the psql_user or psql_pass, it will show the actual content
+
+-- if i remove the secrets which are stored in the container by running command -- 
+
+
+docker service update --secret-rm  psql_user
+or
+docker service update --secret-rm  psql_pass
+
+
+-- It would redeploy the container because secrets are a part of the immutable design of services   
+   if anything in the container has to change for the service, the service will not go in and change 
+   something inside the container. it will actually stop the container and redeploy the new one. 
+   
+-- But, that is not ideal -- there is another way to this
+-- Talk about this later
+
+
+
+================================================================
+
+== Secrets with Swarm Stacks ==
+
+-- So, go into directory udemy-docker-mastery/secrets-sample-2
+-- docker-compose.yml file would be there 
+
+
+
+
+-- in-order to have swarm secrets, so the version has to be atleast 3 and it has to be .1 release of 3
+
+-- so, there are two ways you can do secrets in a compose file are either using a file for each secret,
+   or have the secrets pre-created
+   
+-- we could do is create those secrets on our own in some other method either throughout CLI, like you 
+   have seen or through the API directly. 
+   
+   
+
+docker stack deploy -c docker-compose.yml mydb
+
+Output --
+
+Creating network mydb_default
+Creating secret mydb_psql_password
+Creating secret mydb_psql_user
+Creating service mydb_psql
+
+
+
+docker secret ls
+
+Output --
+
+ID                          NAME                 DRIVER    CREATED              UPDATED
+pw0e4owl81jfanns55j9jpuaj   mydb_psql_password             About a minute ago   About a minute ago
+qmee7yn9civ0123djd6bx8u01   mydb_psql_user                 About a minute ago   About a minute ago
+
+
+
+docker service ps mydb_psql
+
+Output --
+
+ID             NAME          IMAGE             NODE      DESIRED STATE   CURRENT STATE           ERROR     PORTS
+6t2tzg7d6sdp   mydb_psql.1   postgres:latest   nodeA     Running         Running 3 minutes ago
+
+
+
+docker exec -it mydb_psql.1.6t2tzg7d6sdp2pslvce9lxt2q bash
+
+Output --
+
+root@bbbc768d4496:/# cd /run/secrets/
+root@bbbc768d4496:/run/secrets# ls
+psql_password  psql_user
+root@bbbc768d4496:/run/secrets# cat psql_password
+QpqQcgD7dxVG
+root@bbbc768d4496:/run/secrets# cat psql_user
+dbuser
+
+
+**[[docker compose exec psql cat /run/secrets/db_user]]
+**[[where 'psql' is the service name and 'db_user' is the file under '/run/secrets/db_user']]
+
+Contd.
+
+-- The great thing about using secrets with swarm stack is, when i remove the stack, the secrets are 
+   also removed from there, but that is not in the case of service creation via 'docker service create' 
+   that we did above, i removed the service but secrets stays there only. 
+   
+
+
+docker stack rm mydb
+
+Output --
+
+Removing service mydb_psql
+Removing secret mydb_psql_user
+Removing secret mydb_psql_password
+Removing network mydb_default
+
+
+=================================================================
+
+== Assignment ==
+
+== Create a stack with secret and deploy ==
+== under directory 'udemy-docker-mastery/compose-assignment-2/answer/secret-swarm-stack-assignment'
+
+== docker-compose-external.yml
+== I have created that .yml file with secret and i have defined to take input from CLI by initilizing 
+   secret as external: true
+   
+
+
+-- docker-compose-external.yml
+
+
+version: '3.1'
+
+services:
+
+  drupal:
+    image: drupal:8.2
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - drupal-themes:/var/www/html/themes
+
+  postgres:
+    image: postgres:14.3
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_username
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_username
+      - postgres_password
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+
+secrets:
+  postgres_password:
+    external: true
+  postgres_username:
+    external: true
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+
+
+-- echo "dradmin_postgres" | docker secret create postgres_username -
+
+Output --
+
+josikk01zl3si14j7e6b6g6td
+
+
+-- echo "dsfs6hdft63bbg3" | docker secret create postgres_password -
+
+Output --
+
+u3lgup07kl50hxh2vqs27rn7i
+
+
+
+docker secret ls
+
+Output --
+
+ID                          NAME                DRIVER    CREATED              UPDATED
+u3lgup07kl50hxh2vqs27rn7i   postgres_password             6 seconds ago        6 seconds ago
+josikk01zl3si14j7e6b6g6td   postgres_username             About a minute ago   About a minute ago
+
+
+docker stack deploy -c docker-compose-external.yml mydbapp
+
+Output --
+
+Creating network mydbapp_default
+Creating service mydbapp_drupal
+Creating service mydbapp_postgres
+
+
+docker stack ps mydbapp
+
+Output --
+
+ID             NAME                 IMAGE           NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+jipnjdjx72mn   mydbapp_drupal.1     drupal:8.2      nodeA     Running         Running 27 seconds ago
+pqzxeuu86zkf   mydbapp_postgres.1   postgres:14.3   nodeB     Running         Running 27 seconds ago
+
+
+==================================================================
+
+== Using Secrets with Local Docker Compose ==
+== Docker Compose is designed for development ==
+
+
+-- udemy-docker-mastery/secrets-sample-2/docker-compose.yml
+
+
+version: "3.9"
+
+services:
+  psql:
+    image: postgres
+    secrets:
+      - psql_user
+      - psql_password
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/psql_password
+      POSTGRES_USER_FILE: /run/secrets/psql_user
+
+secrets:
+  psql_user:
+    file: ./db_user.txt
+  psql_password:
+    file: ./db_password.txt
+	
+	
+
+docker compose up -d
+
+Output --
+
+[+] Running 1/1
+ ⠿ Container secrets-sample-2-psql-1  Started    0.5s
+ 
+ 
+docker compose exec psql cat /run/secrets/psql_user
+
+Output --
+
+dbuser
+
+
+-- Basically, docker compose is not secure but it works with secrets
+-- It binds mounts at runtime that actual file on my hard drive into my container, it really just doing
+   '-v' with that particular file in the backgroud. again this is totally not secure and it's not 
+   supposed to be. its just a way to get around this problem and allow us to develop with the same 
+   process and the same environment variable secrets information that we would have in production. 
+-- because we want to match our production environment as much as we possibly can locally. 
+-- and this docker compose will only work with file-based secrets, it will not work with external via CLI
+
+
+
+======================================================================
+
+
+== Full App Cycle with Docker Compose ==
+
+-- Directory '/udemy-docker-mastery/swarm-stack-3'
+-- files consisting are ..
+
+Dockerfile
+README.md
+docker-compose.override.yml
+docker-compose.prod.yml
+docker-compose.test.yml
+docker-compose.yml
+psql-fake-password.txt
+themes/
+
+
+-- when i run docker compose up -d 
+-- it will run the docker-compose.yml file and it overlays the docker-compose.override.yml on top
+ 
+ 
+ 
+-- Let me show you content of docker-compose.yml and docker-compose.override.yml contents'
+
+-- docker-compose.yml
+
+
+version: '3.9'
+
+services:
+
+  drupal:
+    image: custom-drupal:latest
+
+  postgres:
+    image: postgres:14.3
+	
+	
+	
+-- docker-compose.override.yml
+
+
+version: '3.9'
+
+services:
+
+  drupal:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - ./themes:/var/www/html/themes
+
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
+    secrets:
+      - psql-pw
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  psql-pw:
+    file: psql-fake-password.txt
+
+
+
+
+-- docker compose up -d 
+
+
+-- docker conatainer ls -a
+
+Output --
+
+CONTAINER ID   IMAGE                  COMMAND                  CREATED       STATUS       PORTS                                   NAMES
+4bd352106432   custom-drupal:latest   "docker-php-entrypoi…"   3 hours ago   Up 3 hours   0.0.0.0:8080->80/tcp, :::8080->80/tcp   swarm-stack-3-drupal-1
+028534fae701   postgres:14.3          "docker-entrypoint.s…"   3 hours ago   Up 3 hours   5432/tcp                                swarm-stack-3-postgres-1
+
+
+
+
+-- docker compose ls
+
+Output --
+
+NAME                STATUS              CONFIG FILES
+swarm-stack-3       running(2)          /docker-worker/udemy-docker-mastery/swarm-stack-3/docker-compose.yml,/docker-worker/udemy-docker-mastery/swarm-stack-3/docker-compose.override.yml
+
+
+-- as you can see in config file
+-- two config files are used from those .yml files
+
+1. /docker-worker/udemy-docker-mastery/swarm-stack-3/docker-compose.yml
+2. /docker-worker/udemy-docker-mastery/swarm-stack-3/docker-compose.override.yml
+
+
+-- and below drupal and postgres volumes are used which are mentioned in docker-compose.override.yml 
+   file
+
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+
+docker inspect swarm-stack-3-drupal-1
+and 
+docker inspect swarm-stack-3-postgres-1
+
+-- you can see the mounts as well while inspecting in the concerned containers
+
+
+
+
+-- as i am having other files also in the same folder 
+-- what if i want to build docker-compose.test.yml along with docker-compose.yml as a base file
+
+
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+
+Output --
+
+ ⠿ Network swarm-stack-3_default      				     Created                                                                       
+ ⠿ Container swarm-stack-3-postgres-1  					 Started                                                                                      
+ ⠿ Container swarm-stack-3-drupal-1   					 Started          
+
+
+
+docker container ls -a 
+
+Output --
+
+e72f419f481b   custom-drupal   "docker-php-entrypoi…"   2 minutes ago   Up 2 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   swarm-stack-3-drupal-1
+5c555a9f25d9   postgres:14.3   "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   5432/tcp                            swarm-stack-3-postgres-1
+
+
+
+-- and if you inspect the drupal container, there would be no mounts because we haven't specified it
+   in docker-compose.test.yml file
+
+-- but if you inspect the postgers container, there would be mount because we have specified it in 
+   docker-compose.test.yml file
+   
+   
+
+docker compose -f docker-compose.yml -f docker-compose.test.yml config
+
+-- Above command will take the two files and push them together into a single Compose file equivalent
+   
+-- So, what we would do here is just run this command somewhere in our CI Solution, then have it output
+   to a file would be the one we would the one we use officially in Production Environment to create
+   or update our stack. 
+   
+   
+
+docker compose -f docker-compose.yml -f docker-compose.test.yml config >> output.yml
+cat output.yml
+
+
+name: swarm-stack-3
+services:
+  drupal:
+    build:
+      context: /docker-worker/udemy-docker-mastery/swarm-stack-3
+      dockerfile: Dockerfile
+    image: custom-drupal
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+  postgres:
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/psql-pw
+    image: postgres:14.3
+    networks:
+      default: null
+    secrets:
+    - source: psql-pw
+    volumes:
+    - type: bind
+      source: /docker-worker/udemy-docker-mastery/swarm-stack-3/sample-data
+      target: /var/lib/postgresql/data
+      bind:
+        create_host_path: true
+networks:
+  default:
+    name: swarm-stack-3_default
+secrets:
+  psql-pw:
+    name: swarm-stack-3_psql-pw
+    file: /docker-worker/udemy-docker-mastery/swarm-stack-3/psql-fake-password.txt
+
+
+
+ 
+=============================================================
+ 
+
+== Service Update ==
+
+
+-- update functionality is centered around a rolling update pattern for your replicas. Which means 
+   if you have a service with more than one replica, and hopefully you do, it's going to roll through 
+   them by default, one at a time, updating each container by replacing it with the new settings that 
+   you're putting in the update command.
+
+-- A lot of people will say that orchestrators prevent downtime in updates, but I'm not going to say 
+   that this prevents downtime. I'm going to say it limits downtime. Because preventing downtime in 
+   any system is the job of testing. You really need to start testing how you do your updates and 
+   determining, does it impact my users? Does updating a database impact my web application? 
+   It probably does.
+
+-- Each application that you have a service for is going to update and impact the other things around 
+   it differently. That's not the job of an orchestrator. An orchestrator can't determine that this one 
+   is a database protocol, and this one is a REST application protocol. So those are going to be 
+   different, complicated things that you need to deal with.
+
+-- In the case of service updates, if it's just a REST API or a web frontend that's not doing anything 
+   fancy like web sockets or long polling, if it's something very simple like that or a static website,
+   you'll probably have an easy update and it won't be a problem. But other services like databases 
+   or persistent storage or anything that requires a persistent connection, those are always going 
+   to be a challenge no matter what you're trying to update, So test early and test often.
+
+-- You also will see that we have scale and rollback options in here that are their own commands now.
+   They used to be options that you had to specify with the --rollback or --scale. 
+   
+   
+docker service scale web=4
+and 
+docker service rollback web
+
+
+-- if you're doing stacks, a stack deploy to the same stack is an update. In fact, there is no separate 
+   option for stack updates. You just do a stack deploy with the same file that's been edited. Then, it 
+   will work with the service commands and the networks, and every other thing it does. It will work 
+   with them to make sure if any changes are necessary, that they get applied.
+
+
+== Swarm Update Examples ==
+
+docker service update --image myapp:1.2.1 <servicename>
+
+-- Just update the image used to a newer version
+
+
+
+docker service update --env-add NODE_ENV=production --publish-rm 8080
+
+-- Adding an environment variable and removing a port
+
+
+
+docker service scale web=8 api=6
+
+-- Change number of replicas of two services
+
+
+
+
+== Swarm updates in Stack Files ==
+
+
+-- In the Swarm updates, you don't have a different deploy command. It's just the same docker stack 
+   deploy, with the file that you've edited, and it's job is to work with all of the other parts of 
+   the API to determine if there's any changes needed, and then roll those out with a service update.
+
+
+docker stack deploy -c file.yml <stackname>
+
+-- Same command, just edit the .yml file and then deploy
+
+
+
+
+== Demo ==
+
+
+docker service create -p 8080:80 --name web nginx:1.13.7
+
+Output --
+
+vph833hfeux0lg9hxoxb549pt
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+
+
+docker service ls
+
+Output --
+
+ID             NAME      MODE         REPLICAS   IMAGE          PORTS
+vph833hfeux0   web       replicated   1/1        nginx:1.13.7   *:8080->80/tcp
+
+
+
+docker service scale web=10
+
+Output --
+
+web scaled to 10
+overall progress: 10 out of 10 tasks
+1/10: running   [==================================================>]
+2/10: running   [==================================================>]
+3/10: running   [==================================================>]
+4/10: running   [==================================================>]
+5/10: running   [==================================================>]
+6/10: running   [==================================================>]
+7/10: running   [==================================================>]
+8/10: running   [==================================================>]
+9/10: running   [==================================================>]
+10/10: running   [==================================================>]
+verify: Service converged
+
+
+
+docker service ls
+
+Output --
+
+ID             NAME      MODE         REPLICAS   IMAGE          PORTS
+vph833hfeux0   web       replicated   10/10      nginx:1.13.7   *:8080->80/tcp
+
+
+
+docker service ps web
+
+Output --
+
+ID             NAME      IMAGE          NODE      DESIRED STATE   CURRENT STATE                ERROR     PORTS
+ar6xkok9mdsm   web.1     nginx:1.13.7   nodeB     Running         Running 3 minutes ago
+d76tnd7leo6h   web.2     nginx:1.13.7   nodeB     Running         Running about a minute ago
+euku3cadwull   web.3     nginx:1.13.7   nodeA     Running         Running about a minute ago
+t3dc3b11k92j   web.4     nginx:1.13.7   nodeC     Running         Running about a minute ago
+uyt6prjxo9hm   web.5     nginx:1.13.7   nodeB     Running         Running about a minute ago
+ei4a62145d79   web.6     nginx:1.13.7   nodeA     Running         Running about a minute ago
+jnl7t90xh1q1   web.7     nginx:1.13.7   nodeC     Running         Running about a minute ago
+2tr9l0375v7w   web.8     nginx:1.13.7   nodeA     Running         Running about a minute ago
+kksrvyhs6aff   web.9     nginx:1.13.7   nodeC     Running         Running about a minute ago
+njaqwrw826al   web.10    nginx:1.13.7   nodeC     Running         Running about a minute ago
+
+
+
+
+docker service update --image nginx:1.13.6 web
+
+-- It just knows that in a service i am changing the image and by default it's going to go through one
+   at a time, it will first remove it, create a new one,and then that's one good to go and it looks 
+   healthy then it just start with next one. 
+   
+Output --
+
+web
+overall progress: 10 out of 10 tasks
+1/10: running   [==================================================>]
+2/10: running   [==================================================>]
+3/10: running   [==================================================>]
+4/10: running   [==================================================>]
+5/10: running   [==================================================>]
+6/10: running   [==================================================>]
+7/10: running   [==================================================>]
+8/10: running   [==================================================>]
+9/10: running   [==================================================>]
+10/10: running   [==================================================>]
+verify: Service converged
+
+
+
+docker service ls 
+
+Output --
+
+ID             NAME      MODE         REPLICAS   IMAGE          PORTS
+vph833hfeux0   web       replicated   10/10      nginx:1.13.6   *:8080->80/tcp
+
+
+
+docker service update --publish-rm 8080 --publish-add 9090:80 web
+
+Output --
+
+web
+overall progress: 10 out of 10 tasks
+1/10: running   [==================================================>]
+2/10: running   [==================================================>]
+3/10: running   [==================================================>]
+4/10: running   [==================================================>]
+5/10: running   [==================================================>]
+6/10: running   [==================================================>]
+7/10: running   [==================================================>]
+8/10: running   [==================================================>]
+9/10: running   [==================================================>]
+10/10: running   [==================================================>]
+verify: Service converged
+
+
+
+docker service ls
+
+Output --
+
+ID             NAME      MODE         REPLICAS   IMAGE          PORTS
+vph833hfeux0   web       replicated   10/10      nginx:1.13.6   *:9090->80/tcp
+
+ 
+
+-- Last thing is something called rebalancing. Or if you change the number of nodes or if you move a 
+   lot of things around, if you have a lot of containers in your swarm, you may find that they're not 
+   really evened out. You've got maybe some nodes that are pretty light on how many containers are 
+   running and other ones that have a lot. If you have a lot of things changing, Swarm will not move 
+   things around to keep everything balanced in terms of the number of resources used.
+
+-- But, what you can do is you can force an update of a service even without changing anything in that 
+   service. Then, it will reissue tasks, and in that case, it will pick the least used nodes, which is 
+   a form of rebalancing. 
+   
+-- A lot of times in a smaller swarm when I move something big, or add a bunch of nodes, I suddenly 
+   have a bunch of empty servers doing nothing and I need to get work on them, So what I'll do is take 
+   one or two of my services, and I will do a ..
+   
+   
+docker service update --force
+
+
+-- and in this case it's going to roll through and completely replace the tasks. Ofcourse it will use 
+   the schedule's default of looking for nodes with the least number of containers and the least number 
+   of resources used. That's kind of a trick to get around an uneven amount of work on your nodes.
+
+
+=================================================================
+
+
+== HealthChecks ==
+
+
+-- HEALTHCHECK was added in 1.12
+-- Supported in Dockerfile, Compose YAML, docker run, and Swarm Services
+-- Docker engine will exec's the command in the container (e.g. curl localhost)
+-- It expects exit 0 (OK) or exit 1 (Error)
+
+-- Three container states: starting, healthy, unhealthy
+-- Much better then "is binary still running?"
+-- Should not be considered a external monitoring replacement
+
+
+-- Healthcheck status shows up in 'docker container ls'
+-- Check last 5 healthchecks with docker container inspect
+-- Docker run does nothing with healthchecks
+-- Services will replace tasks if they fail healthcheck
+-- Service updates wait for them before continuing
+
+
+== Healthcheck Docker Run Example
+
+docker run \
+ --health-cmd="curl -f localhost:9200/_cluster/health || false" \
+ --health-interval=5s \
+ --health-retries=3 \
+ --health-timeout=2s \
+ --health-start-period=15s \
+ elasticsearch:2
+
+
+
+== Healthcheck Dockerfile Examples
+
+-- Options for healthcheck command
+   
+   --interval=DURATION (default: 30s)
+   --timeout=DURATION (default: 30s)
+   --start-period=DURATION (default: 0s) (17.09+)
+   --retries=N (default: 3)
+
+
+-- Basic command using default options
+
+   -- HEALTHCHECK curl -f http://localhost/ || false
+
+
+-- Custom options with the command
+
+   -- HEALTHCHECK --timeout=2s --interval=3s --retries=3 \
+   -- CMD curl -f http://localhost/ || exit 1
+
+
+== Healthcheck in Nginx Dockerfile
+
+Static website running in Nginx, just test default URL
+
+
+FROM nginx:1.13
+HEALTHCHECK --interval=30s --timeout=3s \
+ CMD curl -f http://localhost/ || exit 1
+
+
+
+== Healthcheck in PHP Nginx Dockerfile
+
+PHP-FPM running behind Nginx, test the Nginx and FPM status URLs
+
+
+FROM your-nginx-php-fpm-combo-image
+
+# don't do this if php-fpm is another container
+# must enable php-fpm ping/status in pool.ini
+# must forward /ping and /status urls from nginx to php-fpm
+
+HEALTHCHECK --interval=5s --timeout=3s \
+CMD curl -f http://localhost/ping || exit 1
+
+
+
+== Healthcheck in postgres Dockerfile
+
+Use a PostgreSQL utility to test for ready state
+
+
+
+FROM postgres
+
+# specify real user with -U to prevent errors in log
+
+HEALTHCHECK --interval=5s --timeout=3s \
+ CMD pg_isready -U postgres || exit 1
+
+
+
+== Healthcheck in Compose/Stack Files
+
+
+version: "2.1" (minimum for healthchecks)
+services:
+ web:
+ image: nginx
+ healthcheck:
+ test: ["CMD", "curl", "-f", "http://localhost"]
+ interval: 1m30s
+ timeout: 10s
+ retries: 3
+start_period: 1m  # So, Version 3.4 minimum is required for this option
+
+
+
+
+== Demo ==
+
+
+docker container run --name p1 -d --health-cmd="pg_isready -U postgres || exit 1" -e POSTGRES_PASSWORD=dradmin postgres
+
+-- in '--health-cmd' you define 'pg_isready'
+-- and '-U' is the username 
+
+
+docker container ls 
+
+Output --
+
+CONTAINER ID   IMAGE      COMMAND                  CREATED          STATUS                    PORTS      NAMES
+a07de1e5e33c   postgres   "docker-entrypoint.s…"   39 seconds ago   Up 38 seconds (healthy)   5432/tcp   p2
+
+
+-- as you can see under status, it says 'healthy'
+
+
+
+docker inspect p2
+
+Output --
+
+"Health": {
+                "Status": "healthy",
+                "FailingStreak": 0,
+                "Log": [
+                    {
+                        "Start": "2023-03-21T22:21:02.614461507+05:30",
+                        "End": "2023-03-21T22:21:02.715639101+05:30",
+                        "ExitCode": 0,
+                        "Output": "/var/run/postgresql:5432 - accepting connections\n"
+                    }
+                ]
+            }
+
+
+
+and 
+
+
+"Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "pg_isready -U postgres || exit 1"
+                ]
+            },
+
+
+-- some health check parameters must be defined there only. 
+
+
+
+
+docker service create --name p1 --health-cmd="pg_isready -U postgres || exit 1" -e POSTGRES_PASSWORD=dradmin postgres:latest
+
+Output --
+
+eo046h9nyi1r9nbn2zwecetvo
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+
+-- Three health checkup state in 'docker service create'
+-- Preparing, Starting and Running
+
+
+
+============================================================
+
+== Docker Registry ==
+== The Docker Registry 2.0 implementation for storing and distributing Docker images ==
+
+-- A private image registry for your network 
+-- Part of docker/distribution GitHub repo
+-- It's a de facto registry to store your container privately
+-- Not as full featured as docker.hub.com or others, no Web UI, basic authentication only
+-- At its core, a Web API and storage system, written in GO Language
+-- Storage supports local, S3, Azure, Alibaba, GCP and Openstack Swift
+
+
+== Points (Registry) ==
+
+-- Secure your Registry with TLS
+-- Storage cleanup via Garbage Collection
+-- Enable Hub Caching via "--registry-mirror"
+   -- If you are deploying to production and one of your concerns is that you don't want to depend on
+      the hub for lot of your base images, they you can do is - there is a feature in the Registry to 
+	  enable proxy mdoe and when you tell your docker deamons to use the proxy and what it will do to 
+	  cache any hub images inside the registry.   
+
+
+
+
+== Running a Private Docker Registry ==
+
+-- Run the registry image on default port 5000
+-- Re-Tag an existing images and push it to a new registry
+-- Removing that image from local cache and pull it from new registry
+-- Re-create registry using a bind mount and see how it stores data 
+
+
+== Registry and Proper TLS ==
+
+-- "Secure by Default": Docker won't talk to registry without HTTPS
+-- Except, localhost (127.0.0.0/8)
+-- For remote self-signed TLS, enable "insecure-registry" in engine
+
+
+
+== Demo ==
+
+
+docker container run -d -p 5000:5000 --name registry registry
+
+Output --
+
+0a3cade4476fe93fb9318fea3e0636992a0431cfcb01242c5a05973b5a0a0f01
+
+
+docker container ls -a
+
+Output --
+
+CONTAINER ID   IMAGE      COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+0a3cade4476f   registry   "/entrypoint.sh /etc…"   8 seconds ago   Up 7 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   registry
+
+
+docker volume ls
+
+Output --
+
+DRIVER    VOLUME NAME
+local     9b0f462e5317c4af543afdbb95bc6de2a3c64551d034d147e1ccd05f6e609ab6
+
+
+-- Let's pull some image called hello-world
+
+
+docker pull hello-world
+
+Output --
+
+Using default tag: latest
+latest: Pulling from library/hello-world
+2db29710123e: Pull complete
+Digest: sha256:ffb13da98453e0f04d33a6eee5bb8e46ee50d08ebe17735fc0779d0349e889e9
+Status: Downloaded newer image for hello-world:latest
+docker.io/library/hello-world:latest
+
+
+docker image ls
+
+Output --
+
+REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
+registry      latest    0d153fadf70b   5 weeks ago     24.2MB
+hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+
+-- Let's run the pulled image
+
+
+docker run hello-world
+
+Output --
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+
+
+docker tag hello-world 127.0.0.1:5000/hello-world
+
+-- Before pushing into registry, we have to create tag this way only because we are not pushing this
+   image to hub.docker.com
+   
+
+docker image ls
+
+-- here, you can see an image with tag (127.0.0.1:5000/hello-world) is created which contains 
+   hello-world
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+registry                     latest    0d153fadf70b   5 weeks ago     24.2MB
+127.0.0.1:5000/hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+docker push 127.0.0.1:5000/hello-world
+
+-- now, we are pushing this created image with tag (127.0.0.1:5000/hello-world) to registry
+
+Output --
+
+Using default tag: latest
+The push refers to repository [127.0.0.1:5000/hello-world]
+e07ee1baac5f: Pushed
+latest: digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4 size: 525
+
+
+
+-- Let's remove this local image and everything 'cause we can't see in local volume that where the 
+   image is stored and in registry - volume stores the data
+
+
+
+"[Docker image, container cleanup, lets not remove old volume that is created with registry image which
+ is 9b0f462e5317c4af543afdbb95bc6de2a3c64551d034d147e1ccd05f6e609ab6]"
+
+
+docker container rm 0a3cade4476f
+and 
+docker image remove 127.0.0.1:5000/hello-world:latest
+
+
+docker pull 127.0.0.1:5000/hello-world:latest
+
+-- why did the same image is pulled when we had already removed the 127.0.0.1:5000/hello-world:latest,
+   because this exists in the local volume
+   
+Output --
+
+latest: Pulling from hello-world
+Digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+Status: Downloaded newer image for 127.0.0.1:5000/hello-world:latest
+127.0.0.1:5000/hello-world:latest
+
+
+
+-- Lets remove everything [Container, Images and Volumes]
+**Done
+
+
+
+docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
+
+Output --
+
+Unable to find image 'registry:latest' locally
+latest: Pulling from library/registry
+ef5531b6e74e: Pull complete
+a52704366974: Pull complete
+dda5a8ba6f46: Pull complete
+eb9a2e8a8f76: Pull complete
+25bb6825962e: Pull complete
+Digest: sha256:41f413c22d6156587e2a51f3e80c09808b8c70e82be149b82b5e0196a88d49b4
+Status: Downloaded newer image for registry:latest
+87d462728ab1559d624be361e27ecda909a5a998c68d32f01213a1251a37f029
+
+
+docker container ls -a
+
+Output --
+
+CONTAINER ID   IMAGE      COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+87d462728ab1   registry   "/entrypoint.sh /etc…"   37 seconds ago   Up 36 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   registry
+
+
+docker image ls
+
+Output --
+
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+registry     latest    0d153fadf70b   5 weeks ago   24.2MB
+
+
+
+ls
+
+-- showing the volume stored in current directory where i am working
+
+Output --
+
+drwx------  7 root root  4096 Mar 24 00:48 ./
+drwxr-xr-x 20 root root  4096 Mar 23 22:19 ../
+-rwxrwxrwx  1 root root 18906 Mar 12 02:24 get-docker.sh*
+drwxr-xr-x  2 root root  4096 Mar 24 00:48 registry-data/
+drwx------  3 root root  4096 Mar 12 02:23 snap/
+
+
+
+docker pull hello-world
+
+Output --
+
+Using default tag: latest
+latest: Pulling from library/hello-world
+2db29710123e: Pull complete
+Digest: sha256:ffb13da98453e0f04d33a6eee5bb8e46ee50d08ebe17735fc0779d0349e889e9
+Status: Downloaded newer image for hello-world:latest
+docker.io/library/hello-world:latest
+
+
+docker tag hello-world 127.0.0.1:5000/hello-world
+
+docker image ls
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+registry                     latest    0d153fadf70b   5 weeks ago     24.2MB
+127.0.0.1:5000/hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+docker push 127.0.0.1:5000/hello-world
+
+Output --
+
+Using default tag: latest
+The push refers to repository [127.0.0.1:5000/hello-world]
+e07ee1baac5f: Pushed
+latest: digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4 size: 525
+
+
+ls
+
+Output --
+
+drwx------  7 root root  4096 Mar 24 00:48 ./
+drwxr-xr-x 20 root root  4096 Mar 23 22:19 ../
+-rwxrwxrwx  1 root root 18906 Mar 12 02:24 get-docker.sh*
+drwxr-xr-x  2 root root  4096 Mar 24 00:48 registry-data/
+drwx------  3 root root  4096 Mar 12 02:23 snap/
+
+
+
+cd registry-data/
+and
+ls
+
+Output --
+
+drwxr-xr-x 3 root root 4096 Mar 24 00:52 ./
+drwx------ 7 root root 4096 Mar 24 00:48 ../
+drwxr-xr-x 3 root root 4096 Mar 24 00:52 docker/
+
+
+
+tree
+
+Output --
+
+.
+└── docker
+    └── registry
+        └── v2
+            ├── blobs
+            │   └── sha256
+            │       ├── 2d
+            │       │   └── 2db29710123e3e53a794f2694094b9b4338aa9ee5c40b930cb8063a1be392c54
+            │       │       └── data
+            │       ├── f5
+            │       │   └── f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+            │       │       └── data
+            │       └── fe
+            │           └── feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412
+            │               └── data
+            └── repositories
+                └── hello-world
+                    ├── _layers
+                    │   └── sha256
+                    │       ├── 2db29710123e3e53a794f2694094b9b4338aa9ee5c40b930cb8063a1be392c54
+                    │       │   └── link
+                    │       └── feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412
+                    │           └── link
+                    ├── _manifests
+                    │   ├── revisions
+                    │   │   └── sha256
+                    │   │       └── f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+                    │   │           └── link
+                    │   └── tags
+                    │       └── latest
+                    │           ├── current
+                    │           │   └── link
+                    │           └── index
+                    │               └── sha256
+                    │                   └── f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+                    │                       └── link
+                    └── _uploads
+
+28 directories, 8 files
+
+
+-- here, you can see that the image [hello-world] exists in the local volume 
+
+
+
+==================================================
+
+
+== Using Docker Registry with Swarm ==
+
+
+
+docker node ls
+
+Output --
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+5jjsvjs5bk4vfjrkbww7ekhrm *   manager1   Ready     Active         Reachable        20.10.17
+xggdssitx0bp22dsfcvuhh2eb     manager2   Ready     Active         Reachable        20.10.17
+yjglypzohpiut1tsdxigwdy3o     manager3   Ready     Active         Leader           20.10.17
+lpagtbpejuxw1k1tqglwzlwp3     manager4   Ready     Active         Reachable        20.10.17
+ikib8htjbqx15hy39fuc3et66     manager5   Ready     Active         Reachable        20.10.17
+
+
+
+docker service create --name registry --publish 5000:5000 registry
+
+Output --
+
+lqut5283gfv50dipevtgw6byi
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+
+
+
+docker service ps registry 
+
+Output --
+
+ID             NAME         IMAGE             NODE       DESIRED STATE   CURRENT STATE            ERROR     PORTS
+tg0w2zdi9z65   registry.1   registry:latest   manager3   Running         Running 25 seconds ago 
+
+
+
+-- Let me see the working on port:5000
+
+64.227.145.46:5000/v2/_catalog
+
+-- 'v2/_catalog' is a must to see the json array and under array, as we going to push images into the
+   size becomes larger and images will be shown here, right now nothing is under the array
+   
+Output -- in Chrome Browser
+
+{"repositories":[]}
+
+
+
+docker pull hello-world
+
+Output --
+
+Using default tag: latest
+latest: Pulling from library/hello-world
+2db29710123e: Pull complete 
+Digest: sha256:ffb13da98453e0f04d33a6eee5bb8e46ee50d08ebe17735fc0779d0349e889e9
+Status: Downloaded newer image for hello-world:latest
+docker.io/library/hello-world:latest
+
+
+
+docker tag hello-world 127.0.0.1:5000/hello-world
+
+-- I have created a tag named 127.0.0.1:5000/hello-world with hello-world image
+
+
+
+-- before pushing the 127.0.0.1:5000/hello-world image under registry, lets list the images
+
+docker image ls
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+registry                     <none>    0d153fadf70b   6 weeks ago     24.2MB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+docker push 127.0.0.1:5000/hello-world
+
+Output --
+
+Using default tag: latest
+The push refers to repository [127.0.0.1:5000/hello-world]
+e07ee1baac5f: Pushed 
+latest: digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4 size: 525
+
+
+
+-- Let's list the images
+
+docker image ls 
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+registry                     <none>    0d153fadf70b   6 weeks ago     24.2MB
+127.0.0.1:5000/hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+-- Let me see the working on port:5000
+
+64.227.145.46:5000/v2/_catalog
+
+-- 'v2/_catalog' is a must to see the json array and under array, as we going to push images into the
+   size becomes larger and images will be shown here
+   
+Output -- in Chrome Browser
+
+{"repositories":[hello-world]}
+
+
+
+-- as i will be pushing two images with the same tag command after creating an container so we can check
+   in browser when the container is made
+-- nginx and httpd
+
+docker pull nginx
+and 
+docker pull httpd
+
+
+docker image ls
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+nginx                        latest    ac232364af84   47 hours ago    142MB
+httpd                        latest    192d41583429   2 days ago      145MB
+registry                     <none>    0d153fadf70b   6 weeks ago     24.2MB
+127.0.0.1:5000/hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+docker tag nginx 127.0.0.1:5000/nginx
+and 
+docker push 127.0.0.1:5000/nginx
+
+
+docker tag httpd 127.0.0.1:5000/httpd
+and 
+docker push 127.0.0.1:5000/httpd
+
+
+
+docker image ls
+
+Output --
+
+REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+nginx                        latest    ac232364af84   47 hours ago    142MB
+127.0.0.1:5000/nginx         latest    ac232364af84   47 hours ago    142MB
+127.0.0.1:5000/httpd         latest    192d41583429   2 days ago      145MB
+httpd                        latest    192d41583429   2 days ago      145MB
+registry                     <none>    0d153fadf70b   6 weeks ago     24.2MB
+127.0.0.1:5000/hello-world   latest    feb5d9fea6a5   18 months ago   13.3kB
+hello-world                  latest    feb5d9fea6a5   18 months ago   13.3kB
+
+
+
+-- Let me see the working on port:5000
+
+64.227.145.46:5000/v2/_catalog
+
+-- 'v2/_catalog' is a must to see the json array and under array, as we going to push images into the
+   size becomes larger and images will be shown here
+   
+Output -- in Chrome Browser
+
+{"repositories":["hello-world","httpd","nginx"]}
+
+
+
+-- now, if i delete the actual nginx or httpd image and when i make the server by 'docker service create'
+   the images would be fetched from 127.0.0.1:5000/nginx and 127.0.0.1:5000/httpd
+   
+
+
+docker service create --name nginx-from-registry -p 8080:80 --replicas 10 --detach=false 127.0.0.1:5000/nginx
+
+Output --
+
+znuulmdb5gcr6u546dqgswi0i
+overall progress: 10 out of 10 tasks 
+1/10: running   [==================================================>] 
+2/10: running   [==================================================>] 
+3/10: running   [==================================================>] 
+4/10: running   [==================================================>] 
+5/10: running   [==================================================>] 
+6/10: running   [==================================================>] 
+7/10: running   [==================================================>] 
+8/10: running   [==================================================>] 
+9/10: running   [==================================================>] 
+10/10: running   [==================================================>] 
+verify: Service converged 
+
+
+docker service ps nginx-from-registry
+
+Output --
+
+ID             NAME                     IMAGE                         NODE       DESIRED STATE   CURRENT STATE                ERROR     PORTS
+v2nbln2kcel4   nginx-from-registry.1    127.0.0.1:5000/nginx:latest   manager4   Running         Running about a minute ago             
+lwc2ewuxopm3   nginx-from-registry.2    127.0.0.1:5000/nginx:latest   manager2   Running         Running about a minute ago             
+kvobabilq3o5   nginx-from-registry.3    127.0.0.1:5000/nginx:latest   manager5   Running         Running about a minute ago             
+2j6oa9wxxm72   nginx-from-registry.4    127.0.0.1:5000/nginx:latest   manager4   Running         Running about a minute ago             
+62drp6og4nf6   nginx-from-registry.5    127.0.0.1:5000/nginx:latest   manager1   Running         Running about a minute ago             
+mq9pjh45dgxo   nginx-from-registry.6    127.0.0.1:5000/nginx:latest   manager1   Running         Running about a minute ago             
+17gb7a5eqw5i   nginx-from-registry.7    127.0.0.1:5000/nginx:latest   manager2   Running         Running about a minute ago             
+ee3jojezdz3u   nginx-from-registry.8    127.0.0.1:5000/nginx:latest   manager3   Running         Running 59 seconds ago                 
+xoa5epakmugb   nginx-from-registry.9    127.0.0.1:5000/nginx:latest   manager3   Running         Running about a minute ago             
+g3yhyxtl3uli   nginx-from-registry.10   127.0.0.1:5000/nginx:latest   manager5   Running         Running about a minute ago             
+
+
+
+docker service create --name httpd-from-registry -p 8090:80 --replicas 10 --detach=false 127.0.0.1:5000/httpd
+
+Output --
+
+oqcgyfrfacx7xilq5isp71dy1
+overall progress: 10 out of 10 tasks 
+1/10: running   [==================================================>] 
+2/10: running   [==================================================>] 
+3/10: running   [==================================================>] 
+4/10: running   [==================================================>] 
+5/10: running   [==================================================>] 
+6/10: running   [==================================================>] 
+7/10: running   [==================================================>] 
+8/10: running   [==================================================>] 
+9/10: running   [==================================================>] 
+10/10: running   [==================================================>] 
+verify: Service converged 
+
+
+
+docker service ps httpd-from-registry 
+
+Output --
+
+ID             NAME                     IMAGE                         NODE       DESIRED STATE   CURRENT STATE            ERROR     PORTS
+0r776i2nfrmg   httpd-from-registry.1    127.0.0.1:5000/httpd:latest   manager3   Running         Running 18 seconds ago             
+jcausuwe2m0g   httpd-from-registry.2    127.0.0.1:5000/httpd:latest   manager4   Running         Running 15 seconds ago             
+30jahz6s4xe1   httpd-from-registry.3    127.0.0.1:5000/httpd:latest   manager5   Running         Running 16 seconds ago             
+s8k8a7lq7j0r   httpd-from-registry.4    127.0.0.1:5000/httpd:latest   manager5   Running         Running 16 seconds ago             
+8rntu5k4ni2u   httpd-from-registry.5    127.0.0.1:5000/httpd:latest   manager2   Running         Running 20 seconds ago             
+5wbdcz8l9v2j   httpd-from-registry.6    127.0.0.1:5000/httpd:latest   manager1   Running         Running 24 seconds ago             
+k948vfxjzte9   httpd-from-registry.7    127.0.0.1:5000/httpd:latest   manager1   Running         Running 25 seconds ago             
+vzha9lqr6fez   httpd-from-registry.8    127.0.0.1:5000/httpd:latest   manager4   Running         Running 15 seconds ago             
+i7ppgc1t7mq1   httpd-from-registry.9    127.0.0.1:5000/httpd:latest   manager2   Running         Running 19 seconds ago             
+ywkd67ajgb1n   httpd-from-registry.10   127.0.0.1:5000/httpd:latest   manager3   Running         Running 18 seconds ago 
+
+
+-- Because of the Routing Mesh, All Nodes can see 127.0.0.1:5000 registry
+-- means, if i push an tomcat image on node1 and tag it and save it under 127.0.0.1:5000
+-- I will be able to create service by 'docker service create' on any Node - let's say Node3
+
+
+On Manager1
+
+docker pull tomcat
+and 
+docker tag tomcat 127.0.0.1:5000/tomcat
+and 
+docker push 127.0.0.1:5000/tomcat
+
+
+docker image ls 
+
+Output --
+
+REPOSITORY              TAG       IMAGE ID       CREATED        SIZE
+127.0.0.1:5000/nginx    <none>    ac232364af84   47 hours ago   142MB
+127.0.0.1:5000/httpd    <none>    192d41583429   2 days ago     145MB
+127.0.0.1:5000/tomcat   <none>    51c25da77baf   9 days ago     474MB
+
+
+
+On Manager3
+
+docker create service --name tomcat-from-registry --detach=false --publish 8010:80 --replicas 10 127.0.0.1:5000/tomcat
+
+Output --
+
+lj2dv4enst6bmjljj5rbmxjvo
+overall progress: 10 out of 10 tasks 
+1/10: running   [==================================================>] 
+2/10: running   [==================================================>] 
+3/10: running   [==================================================>] 
+4/10: running   [==================================================>] 
+5/10: running   [==================================================>] 
+6/10: running   [==================================================>] 
+7/10: running   [==================================================>] 
+8/10: running   [==================================================>] 
+9/10: running   [==================================================>] 
+10/10: running   [==================================================>] 
+verify: Service converged 
+
+
+
+docker service ps tomcat-from-registry
+
+Output --
+
+ID             NAME                      IMAGE                          NODE       DESIRED STATE   CURRENT STATE           ERROR     PORTS
+m0egy423mh9c   tomcat-from-registry.1    127.0.0.1:5000/tomcat:latest   manager1   Running         Running 3 minutes ago             
+lyrskdn9x89s   tomcat-from-registry.2    127.0.0.1:5000/tomcat:latest   manager4   Running         Running 3 minutes ago             
+l7bb4saxxzj0   tomcat-from-registry.3    127.0.0.1:5000/tomcat:latest   manager3   Running         Running 2 minutes ago             
+xd604a0sl1i8   tomcat-from-registry.4    127.0.0.1:5000/tomcat:latest   manager2   Running         Running 3 minutes ago             
+y11vmr0ylr3k   tomcat-from-registry.5    127.0.0.1:5000/tomcat:latest   manager1   Running         Running 3 minutes ago             
+d8uc3e2lstug   tomcat-from-registry.6    127.0.0.1:5000/tomcat:latest   manager3   Running         Running 2 minutes ago             
+j9vlb640mvt2   tomcat-from-registry.7    127.0.0.1:5000/tomcat:latest   manager5   Running         Running 3 minutes ago             
+6flk2ono32n3   tomcat-from-registry.8    127.0.0.1:5000/tomcat:latest   manager5   Running         Running 3 minutes ago             
+qewkpjn5mycu   tomcat-from-registry.9    127.0.0.1:5000/tomcat:latest   manager2   Running         Running 3 minutes ago             
+annkvkqu9299   tomcat-from-registry.10   127.0.0.1:5000/tomcat:latest   manager4   Running         Running 3 minutes ago
+
+
+-- Let me see the working on port:5000
+
+64.227.145.46:5000/v2/_catalog
+
+-- 'v2/_catalog' is a must to see the json array and under array, as we going to push images into the
+   size becomes larger and images will be shown here
+   
+Output -- in Chrome Browser
+
+{"repositories":["hello-world","httpd","nginx","tomcat"]}
+
+
+=========================================================================
+
+*** === Kubernetes === ***
+
+=========================================================================
+
+
+-- kubectl
+CLI to configure Kubernetes and manage apps
+
+-- node
+Single server in Kubernetes cluster
+
+-- kubelet
+Kubernetes agent running on nodes
+
+-- Control Plane
+Set of containers that manage the cluster
+ *It includes API server, scheduler, controller manager, etcd, and more
+ *It sometimes called 'Master'
+ 
+ -- etcd - A distributed storage system for key-value
+ -- API Server - The medium we talk to cluster and issue order to it what to run what not
+ -- Scheduler - Control, how and where you container are placed on the nodes, on the objects known 'Pods'
+ -- Controller Manager - It looks at the state of whole cluster if anything running on it means it takes 
+                         the order or to giving it and determine what you are asking to do and what 
+						 actually going on
+ -- Core DNS 
+ -- Kuber-Proxy - To control the networking
+ 
+and on all nodes, there should be an engine running known as 'kubelet'
+
+
+
+=== Basic Defination ==
+
+
+-- Pods 
+
+One or more container running together on one node and its basic unit of deployment, containers are 
+always in Pods. 
+
+-- Controller
+
+For creating/updating pods and other objects. Many types of controller including deploymnet, Replicaset,
+Statefulset, Daemonset, Job, Cronjob and etc
+
+-- Service 
+
+Network endpoint to connect with pod
+
+-- Namespace 
+
+Filtered group of objects in cluster, It's not a security feature as in docker
+
+
+=======================================================
+
+
+-- There are several way for kubectl 
+-- But, three ways to create pods from kubectl CLI
+
+
+kubectl run 
+
+-- Single pod per command since version 1.18
+
+kubectl create
+
+-- Create some resources via CLI or YAML
+
+kubectl apply
+
+-- Create/Update anything via YAML
+
+
+
+-- I have installed minikube by following the below guide 
+
+https://minikube.sigs.k8s.io/docs/start/
+
+-- I have edit the alias in .bashrc file of minikube
+
+
+# alias for kubectl to microk8s
+alias kubectl='microk8s.kubectl'
+
+
+-- So, by now on - i can just type 'kubectl' and it runs
+
+
+
+kubectl version
+or
+kubectl version --short
+
+
+kubectl run webserver --image nginx
+
+-- The idea is that kubectl run is now similar to docker run. It creates a single pod, where docker run 
+   creates a single container.
+-- To create a pod
+-- The Output shows it created but it doesn't mean that the service is running inside the pod
+
+Output --
+
+pod/webserver created
+
+
+
+-- Pods basically is an kubernetes concept, Idea of a pod is a layer of abstraction, of resource type
+   that wraps around one or more container that all share the same IP Address and the same deployment 
+   machanism. 
+   
+-- Unlike docker, you can't create a container directly in K8s
+
+-- You create pod(s) [via CLI, YAML, or API], Kubernetes then creates the container(s) inside it
+
+-- kubelet tells the container runtime to create containers for you
+
+-- Every type of resource to run containers uses pods
+
+
+
+== Process of Pods and Container creation ==
+
+
+-- If I'm typing in that kubectl run command, like we just did, it's going to send the request for a pod
+   to the control plane. That's the API + the scheduler + the controller manager + the etcd database or 
+   whatever database you have and the API's going to receive that request, store in the database as a 
+   pod request, the scheduler will assign it to a node, and then the kubelet agent, which has a 
+   persistent connection to the API, will see a new request for a pod on its node. It will then take 
+   that, interpret it into how many containers you need it to create. Now, in our case, we just created 
+   a single container running nginx. So, kubelet then tells the container runtime. In your case, it 
+   might have been Docker, it might have been containerd, might have been something else, but it will 
+   tell the container runtime to create that container, which happens to run nginx.
+
+
+
+kubectl get pods
+
+-- To list the pods
+
+Output --
+
+NAME        READY   STATUS    RESTARTS   AGE
+webserver   1/1     Running   0          13s
+
+
+
+kubectl get all
+
+Output --
+
+NAME            READY   STATUS    RESTARTS       AGE
+pod/webserver   1/1     Running   1 (117m ago)   14h
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   3d16h
+
+
+
+== Creating Deployment ==
+
+
+kubectl create deployment webserver --image nginx
+or 
+kubectl create deploy webserver --image nginx
+or 
+kubectl create deployments webserver --image nginx
+
+Output --
+
+deployment.apps/webserver created
+
+
+kubectl get all
+
+Output --
+
+NAME                             READY   STATUS    RESTARTS       AGE
+pod/webserver                    1/1     Running   1 (118m ago)   14h
+pod/webserver-696774f554-nnb5g   1/1     Running   0              67s
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   3d16h
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webserver   1/1     1            1           67s
+
+NAME                                   DESIRED   CURRENT   READY   AGE
+replicaset.apps/webserver-696774f554   1         1         1       67s
+
+
+
+-- here, you can see i had a pod name 'webserver' and i have created service called 'deployment' and it
+   took a weird string after the named pod 'webserver(-696774f554-nnb5g)'
+
+-- We have the API. That's the standard web API that we've been talking to. We asked it for a 
+   deployment, it then took that record and stored it in etcd. Let's just imagine that we have this 
+   etcd database and that database stores the record for a deployment. This object right here is the 
+   controller manager and the manager's job is to look at all the different resource types. If it sees 
+   a new resource type, there's a controller that hopefully is assigned to that resource type. In this 
+   case, built into Kubernetes is the resource type of pod and the resource type of deployment. These 
+   are built into every Kubernetes you will ever run and the controller manager looks at the API and 
+   sees this new deployment resource. The controller manager itself controls deployment resources, 
+   since it has that controller built in and so the job of the deployment resource is to do one thing.
+   That is to create a ReplicaSet. A deployment really doesn't create pods directly, it creates a 
+   ReplicaSet and so a deployment that's going to deploy new pods with new containers, it could be 
+   deploying the new version at the same time as the old version is still running and so a deployment 
+   creates a ReplicaSet for each new deployment type and so for each version that we create of that 
+   deployment, it's creating another ReplicaSet. So there is a few moments in time in your cluster, 
+   if I were to go and change something with a deployment, let's say the image version, because I got 
+   a new version of my app, it will create a new second ReplicaSet at the same time as the existing 
+   ReplicaSet exists and the two ReplicaSets will have two different pod specifications. One is the old 
+   version of the pod with the old image name, and the new image name or tag in the new ReplicaSet. So 
+   these have to exist at the same time. That's the big reason why deployments now exist in Kubernetes.
+   Because we typically want to roll out a new version of our thing while the old version is being 
+   replaced, like it's being taken out and there needs to be a little bit of time, maybe it's seconds, 
+   maybe it's hours, depending on how many you have, that those pods exist all at the same time. So 
+   the ReplicaSet acts as sort of a version of each deployment that you're changing something in it.
+   You're changing the number of replicas, you're changing the image version, and that controller 
+   manager does all that work. So if you were to watch the database while this was happening, the etcd 
+   database would show up as a record for a deployment. Then the controller manager would see that and 
+   create a record for ReplicaSet and then the ReplicaSet controller, again, part of the controller 
+   manager, would see the ReplicaSet definition and know that it needs to create some pods. It would 
+   then create those pods adding them back to the database, and then the scheduler would notice that 
+   the pods have not been scheduled to a node and all that complexity brings us back here, which is 
+   once the pod has been scheduled for a node, then it's assigned to the kubelet, the kubelet knows 
+   where to go find the record through the API. It then tells the runtime to create it and then the 
+   container finally gets created in our container runtime. This all seems very complex, but the 
+   reality is, it's simply an API managing some database resources and it all happens in seconds.
+   Often, it'll happen so fast that you have a hard time seeing the changes, unless you're using a 
+   watch command or something that's constantly monitoring every change. So when you go look at that 
+   get all command, that hopefully explains a little bit about why all these resources exist, is because
+   we create a deployment. The deployment then created the ReplicaSet through the controller manager, 
+   a part of the control plane, the ReplicaSet then created the pod and you'll notice these random 
+   numbers. The random number is like, let's say here, see, we see the deployment name. That's what we 
+   called it, the deployment and then the deployment created a ReplicaSet with a random number. Each 
+   time, it makes a new version that we change later maybe, we change the deployment, it will then 
+   change to a new version of a ReplicaSet and that ReplicaSet is then tied to the pod name.
+
+-- Notice that that ReplicaSet name is right there. So technically, this isn't that random. The pod is 
+   the name of the deployment, the name of the ReplicaSet and then the name of the pod. So these 
+   different IDs all come together to guarantee us a unique name for the pod.
+
+
+
+== Scaling ReplicaSet ==
+
+
+kubectl create deploy my-apache --image httpd
+
+Output --
+
+deployment.apps/my-apache created
+
+
+
+kubectl get pods
+
+Output --
+
+NAME                         READY   STATUS    RESTARTS        AGE
+webserver                    1/1     Running   1 (4h37m ago)   17h
+webserver-696774f554-nnb5g   1/1     Running   0               160m
+my-apache-9f66c6b44-ppsqw    1/1     Running   0               26s
+
+
+
+kubectl get all
+
+Output --
+
+NAME                             READY   STATUS    RESTARTS        AGE
+pod/webserver                    1/1     Running   1 (4h38m ago)   17h
+pod/webserver-696774f554-nnb5g   1/1     Running   0               160m
+pod/my-apache-9f66c6b44-ppsqw    1/1     Running   0               66s
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   3d19h
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webserver   1/1     1            1           160m
+deployment.apps/my-apache   1/1     1            1           66s
+
+NAME                                   DESIRED   CURRENT   READY   AGE
+replicaset.apps/webserver-696774f554   1         1         1       160m
+replicaset.apps/my-apache-9f66c6b44    1         1         1       66s
+
+
+
+kubectl scale deploy my-apache --replicas 10
+or
+kubectl scale deploy/my-apache --replicas 10
+
+Output --
+
+deployment.apps/my-apache scaled
+
+
+
+kubectl get pods
+
+Output --
+
+NAME                         READY   STATUS    RESTARTS        AGE
+webserver                    1/1     Running   1 (4h39m ago)   17h
+webserver-696774f554-nnb5g   1/1     Running   0               162m
+my-apache-9f66c6b44-ppsqw    1/1     Running   0               2m31s
+my-apache-9f66c6b44-4qxbs    1/1     Running   0               45s
+my-apache-9f66c6b44-q4dm5    1/1     Running   0               45s
+my-apache-9f66c6b44-c8srh    1/1     Running   0               45s
+my-apache-9f66c6b44-fmzqd    1/1     Running   0               45s
+my-apache-9f66c6b44-672jn    1/1     Running   0               45s
+my-apache-9f66c6b44-fdwqs    1/1     Running   0               45s
+my-apache-9f66c6b44-962r6    1/1     Running   0               45s
+my-apache-9f66c6b44-kjq8b    1/1     Running   0               45s
+my-apache-9f66c6b44-8ddx5    1/1     Running   0               45s
+
+
+
+kubectl get all
+
+Output --
+
+NAME                             READY   STATUS    RESTARTS        AGE
+pod/webserver                    1/1     Running   1 (4h40m ago)   17h
+pod/webserver-696774f554-nnb5g   1/1     Running   0               162m
+pod/my-apache-9f66c6b44-ppsqw    1/1     Running   0               3m2s
+pod/my-apache-9f66c6b44-4qxbs    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-q4dm5    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-c8srh    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-fmzqd    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-672jn    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-fdwqs    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-962r6    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-kjq8b    1/1     Running   0               76s
+pod/my-apache-9f66c6b44-8ddx5    1/1     Running   0               76s
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.152.183.1   <none>        443/TCP   3d19h
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webserver   1/1     1            1           162m
+deployment.apps/my-apache   10/10   10           10          3m2s
+
+NAME                                   DESIRED   CURRENT   READY   AGE
+replicaset.apps/webserver-696774f554   1         1         1       162m
+replicaset.apps/my-apache-9f66c6b44    10        10        10      3m2s
+
+
+== What happens when we scale ==
+
+-- kubectl scale will change the deployment/my-apache record
+-- Configuration Manager will see that only replica count has changed
+-- It will change the number of pods in ReplicaSet
+-- Scheduler sees a new pod is requested, assigns the node
+-- kubelet sees a new pod, tells container runtime to start httpd service
+
+
+
